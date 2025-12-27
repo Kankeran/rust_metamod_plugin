@@ -2614,50 +2614,6 @@ const _: () = {
     ["Offset of field: gamedll_funcs_t::newapi_table"]
         [::std::mem::offset_of!(gamedll_funcs_t, newapi_table) - 4usize];
 };
-unsafe extern "C" {
-    #[link_name = "\u{1}?g_engfuncs@@3Uenginefuncs_s@@A"]
-    pub static mut g_engfuncs: enginefuncs_t;
-}
-unsafe extern "C" {
-    #[link_name = "\u{1}?gpGlobals@@3PAUglobalvars_t@@A"]
-    pub static mut gpGlobals: *mut globalvars_t;
-}
-unsafe extern "C" {
-    pub fn Meta_Query(
-        interfaceVersion: *const ::std::os::raw::c_char,
-        plinfo: *mut *mut plugin_info_t,
-        pMetaUtilFuncs: *mut mutil_funcs_t,
-    ) -> ::std::os::raw::c_int;
-}
-pub type META_QUERY_FN = ::std::option::Option<
-    unsafe extern "C" fn(
-        interfaceVersion: *const ::std::os::raw::c_char,
-        plinfo: *mut *mut plugin_info_t,
-        pMetaUtilFuncs: *mut mutil_funcs_t,
-    ) -> ::std::os::raw::c_int,
->;
-unsafe extern "C" {
-    pub fn Meta_Attach(
-        now: PLUG_LOADTIME,
-        pFunctionTable: *mut META_FUNCTIONS,
-        pMGlobals: *mut meta_globals_t,
-        pGamedllFuncs: *mut gamedll_funcs_t,
-    ) -> ::std::os::raw::c_int;
-}
-pub type META_ATTACH_FN = ::std::option::Option<
-    unsafe extern "C" fn(
-        now: PLUG_LOADTIME,
-        pFunctionTable: *mut META_FUNCTIONS,
-        pMGlobals: *mut meta_globals_t,
-        pGamedllFuncs: *mut gamedll_funcs_t,
-    ) -> ::std::os::raw::c_int,
->;
-unsafe extern "C" {
-    pub fn Meta_Detach(now: PLUG_LOADTIME, reason: PL_UNLOAD_REASON) -> ::std::os::raw::c_int;
-}
-pub type META_DETACH_FN = ::std::option::Option<
-    unsafe extern "C" fn(now: PLUG_LOADTIME, reason: PL_UNLOAD_REASON) -> ::std::os::raw::c_int,
->;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct delta_s {
