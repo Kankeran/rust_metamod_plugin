@@ -1,7 +1,13 @@
+use std::{ffi::CString, ptr::null_mut};
+
+use cstr::cstr;
+
 use crate::{
-    metamod::{abi, adapter, meta},
+    metamod::{abi, adapter, meta, meta_util},
     util::log,
 };
+
+use super::msgs;
 
 static FUNCTION_TABLE: abi::DLL_FUNCTIONS = abi::DLL_FUNCTIONS {
     pfnGameInit: None,
@@ -25,7 +31,7 @@ static FUNCTION_TABLE: abi::DLL_FUNCTIONS = abi::DLL_FUNCTIONS {
     pfnClientPutInServer: Some(client_put_in_server),
     pfnClientCommand: Some(client_command),
     pfnClientUserInfoChanged: None,
-    pfnServerActivate: None,
+    pfnServerActivate: Some(server_activate),
     pfnServerDeactivate: None,
     pfnPlayerPreThink: None,
     pfnPlayerPostThink: None,
@@ -79,6 +85,12 @@ pub extern "C" fn get_api(
     1
 }
 
+extern "C" fn client_put_in_server(entity: *mut abi::edict_t) {
+    if let Some(player_id) = meta::get_ent_index(entity) {
+        adapter::console_log(&format!("player with id {} joined", player_id));
+    }
+}
+
 extern "C" fn client_command(entity: *mut abi::edict_t) {
     let _ = entity;
     if let Some(api) = meta::ENG_FUNCS.get() {
@@ -90,6 +102,16 @@ extern "C" fn client_command(entity: *mut abi::edict_t) {
                 let str_cmd = meta::c_char_to_string(cmd);
                 let str_arg = meta::c_char_to_string(arg);
                 log::info(&format!("{} {}, argc: {}", str_cmd, str_arg, argc));
+
+                if str_cmd.eq("say") && str_arg.eq("/rust") {
+                    let message = format!("wywolales komende rust z wartoscia {}", str_arg);
+                    log::info(&message);
+                    if let Ok(cmsg) = CString::new(message).as_ref() {
+                        meta_util::client_say_text(entity, 4, cmsg); // 4 = center
+                        // meta::set_meta_result(abi::META_RES_MRES_SUPERCEDE);
+                        // return;
+                    }
+                }
             }
             meta::set_meta_result(abi::META_RES_MRES_IGNORED);
             return;
@@ -97,8 +119,12 @@ extern "C" fn client_command(entity: *mut abi::edict_t) {
     }
 }
 
-extern "C" fn client_put_in_server(entity: *mut abi::edict_t) {
-    if let Some(player_id) = meta::get_ent_index(entity) {
-        adapter::console_log(&format!("player with id {} joined", player_id));
+extern "C" fn server_activate(
+    _entity_list: *mut abi::edict_t,
+    _entity_count: ::std::os::raw::c_int,
+    _client_max: ::std::os::raw::c_int,
+) {
+    if let None = unsafe { msgs::TEXT_MSG } {
+        unsafe { msgs::TEXT_MSG = meta::get_user_msg_id(cstr!("TextMsg"), null_mut()) };
     }
 }

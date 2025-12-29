@@ -2,7 +2,7 @@
 
 use crate::{metamod::adapter, util::log};
 
-use super::abi;
+use super::{abi, meta, msgs};
 
 static ENG_FUNCS: abi::enginefuncs_t = abi::enginefuncs_t {
     pfnPrecacheModel: None,
@@ -186,4 +186,200 @@ pub extern "C" fn get_functions(
     adapter::console_log("engine funcs loaded");
 
     1
+}
+
+static ENG_FUNCS_POST: abi::enginefuncs_t = abi::enginefuncs_t {
+    pfnPrecacheModel: None,
+    pfnPrecacheSound: None,
+    pfnSetModel: None,
+    pfnModelIndex: None,
+    pfnModelFrames: None,
+    pfnSetSize: None,
+    pfnChangeLevel: None,
+    pfnGetSpawnParms: None,
+    pfnSaveSpawnParms: None,
+    pfnVecToYaw: None,
+    pfnVecToAngles: None,
+    pfnMoveToOrigin: None,
+    pfnChangeYaw: None,
+    pfnChangePitch: None,
+    pfnFindEntityByString: None,
+    pfnGetEntityIllum: None,
+    pfnFindEntityInSphere: None,
+    pfnFindClientInPVS: None,
+    pfnEntitiesInPVS: None,
+    pfnMakeVectors: None,
+    pfnAngleVectors: None,
+    pfnCreateEntity: None,
+    pfnRemoveEntity: None,
+    pfnCreateNamedEntity: None,
+    pfnMakeStatic: None,
+    pfnEntIsOnFloor: None,
+    pfnDropToFloor: None,
+    pfnWalkMove: None,
+    pfnSetOrigin: None,
+    pfnEmitSound: None,
+    pfnEmitAmbientSound: None,
+    pfnTraceLine: None,
+    pfnTraceToss: None,
+    pfnTraceMonsterHull: None,
+    pfnTraceHull: None,
+    pfnTraceModel: None,
+    pfnTraceTexture: None,
+    pfnTraceSphere: None,
+    pfnGetAimVector: None,
+    pfnServerCommand: None,
+    pfnServerExecute: None,
+    pfnClientCommand: None,
+    pfnParticleEffect: None,
+    pfnLightStyle: None,
+    pfnDecalIndex: None,
+    pfnPointContents: None,
+    pfnMessageBegin: None,
+    pfnMessageEnd: None,
+    pfnWriteByte: None,
+    pfnWriteChar: None,
+    pfnWriteShort: None,
+    pfnWriteLong: None,
+    pfnWriteAngle: None,
+    pfnWriteCoord: None,
+    pfnWriteString: None,
+    pfnWriteEntity: None,
+    pfnCVarRegister: None,
+    pfnCVarGetFloat: None,
+    pfnCVarGetString: None,
+    pfnCVarSetFloat: None,
+    pfnCVarSetString: None,
+    pfnAlertMessage: None,
+    pfnEngineFprintf: None,
+    pfnPvAllocEntPrivateData: None,
+    pfnPvEntPrivateData: None,
+    pfnFreeEntPrivateData: None,
+    pfnSzFromIndex: None,
+    pfnAllocString: None,
+    pfnGetVarsOfEnt: None,
+    pfnPEntityOfEntOffset: None,
+    pfnEntOffsetOfPEntity: None,
+    pfnIndexOfEdict: None,
+    pfnPEntityOfEntIndex: None,
+    pfnFindEntityByVars: None,
+    pfnGetModelPtr: None,
+    pfnRegUserMsg: Some(reg_user_msg_post),
+    pfnAnimationAutomove: None,
+    pfnGetBonePosition: None,
+    pfnFunctionFromName: None,
+    pfnNameForFunction: None,
+    pfnClientPrintf: None,
+    pfnServerPrint: None,
+    pfnCmd_Args: None,
+    pfnCmd_Argv: None,
+    pfnCmd_Argc: None,
+    pfnGetAttachment: None,
+    pfnCRC32_Init: None,
+    pfnCRC32_ProcessBuffer: None,
+    pfnCRC32_ProcessByte: None,
+    pfnCRC32_Final: None,
+    pfnRandomLong: None,
+    pfnRandomFloat: None,
+    pfnSetView: None,
+    pfnTime: None,
+    pfnCrosshairAngle: None,
+    pfnLoadFileForMe: None,
+    pfnFreeFile: None,
+    pfnEndSection: None,
+    pfnCompareFileTime: None,
+    pfnGetGameDir: None,
+    pfnCvar_RegisterVariable: None,
+    pfnFadeClientVolume: None,
+    pfnSetClientMaxspeed: None,
+    pfnCreateFakeClient: None,
+    pfnRunPlayerMove: None,
+    pfnNumberOfEntities: None,
+    pfnGetInfoKeyBuffer: None,
+    pfnInfoKeyValue: None,
+    pfnSetKeyValue: None,
+    pfnSetClientKeyValue: None,
+    pfnIsMapValid: None,
+    pfnStaticDecal: None,
+    pfnPrecacheGeneric: None,
+    pfnGetPlayerUserId: None,
+    pfnBuildSoundMsg: None,
+    pfnIsDedicatedServer: None,
+    pfnCVarGetPointer: None,
+    pfnGetPlayerWONId: None,
+    pfnInfo_RemoveKey: None,
+    pfnGetPhysicsKeyValue: None,
+    pfnSetPhysicsKeyValue: None,
+    pfnGetPhysicsInfoString: None,
+    pfnPrecacheEvent: None,
+    pfnPlaybackEvent: None,
+    pfnSetFatPVS: None,
+    pfnSetFatPAS: None,
+    pfnCheckVisibility: None,
+    pfnDeltaSetField: None,
+    pfnDeltaUnsetField: None,
+    pfnDeltaAddEncoder: None,
+    pfnGetCurrentPlayer: None,
+    pfnCanSkipPlayer: None,
+    pfnDeltaFindField: None,
+    pfnDeltaSetFieldByIndex: None,
+    pfnDeltaUnsetFieldByIndex: None,
+    pfnSetGroupMask: None,
+    pfnCreateInstancedBaseline: None,
+    pfnCvar_DirectSet: None,
+    pfnForceUnmodified: None,
+    pfnGetPlayerStats: None,
+    pfnAddServerCommand: None,
+    pfnVoice_GetClientListening: None,
+    pfnVoice_SetClientListening: None,
+    pfnGetPlayerAuthId: None,
+    pfnSequenceGet: None,
+    pfnSequencePickSentence: None,
+    pfnGetFileSize: None,
+    pfnGetApproxWavePlayLen: None,
+    pfnIsCareerMatch: None,
+    pfnGetLocalizedStringLength: None,
+    pfnRegisterTutorMessageShown: None,
+    pfnGetTimesTutorMessageShown: None,
+    pfnProcessTutorMessageDecayBuffer: None,
+    pfnConstructTutorMessageDecayBuffer: None,
+    pfnResetTutorMessageDecayData: None,
+    pfnQueryClientCvarValue: None,
+    pfnQueryClientCvarValue2: None,
+    pfnCheckParm: None,
+};
+
+pub extern "C" fn get_functions_post(
+    functions_from_engine: *mut abi::enginefuncs_t,
+    interface_version: *mut ::std::os::raw::c_int,
+) -> ::std::os::raw::c_int {
+    log::info("get_engine_functions");
+    if functions_from_engine.is_null() {
+        adapter::alert("something went wrong");
+        return 0;
+    }
+    if unsafe { *interface_version } != abi::ENGINE_INTERFACE_VERSION as i32 {
+        adapter::alert("something went wrong");
+        return 0;
+    }
+
+    unsafe {
+        *functions_from_engine = ENG_FUNCS_POST;
+    }
+
+    1
+}
+
+extern "C" fn reg_user_msg_post(
+    name: *const ::std::os::raw::c_char,
+    _size: ::std::os::raw::c_int,
+) -> ::std::os::raw::c_int {
+    let name = meta::c_char_to_string(name);
+
+    if name.eq("TextMsg") {
+        unsafe { msgs::TEXT_MSG = Some(meta::result_orig_ret()) };
+    }
+
+    meta::set_meta_result(abi::META_RES_MRES_IGNORED);
+    0
 }

@@ -55,7 +55,7 @@ static META_FUNCTION_TABLE: abi::META_FUNCTIONS = abi::META_FUNCTIONS {
     pfnGetNewDLLFunctions: None,
     pfnGetNewDLLFunctions_Post: None,
     pfnGetEngineFunctions: Some(engine::get_functions),
-    pfnGetEngineFunctions_Post: None,
+    pfnGetEngineFunctions_Post: Some(engine::get_functions_post),
 };
 
 #[unsafe(export_name = "Meta_Attach")]

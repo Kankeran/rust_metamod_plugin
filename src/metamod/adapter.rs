@@ -19,3 +19,7 @@ pub fn alert(msg: &str) {
         meta::alert(cmsg.as_c_str());
     }
 }
+
+pub fn client_print(msg: &str) {
+    
+}
