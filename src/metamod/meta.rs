@@ -1,9 +1,13 @@
-use super::abi;
+use super::{abi, entry};
 use cstr::cstr;
 use std::{
     ffi::{CStr, c_char},
     sync::OnceLock,
 };
+
+pub fn setup_entry(init: fn(), setup: fn(), client_command: fn(i32, Vec<String>)->i32) {
+    let _ = entry::ENTRY_FUNCS.set(entry::EntryFuncs::new(init, setup, client_command));
+}
 
 static PRINT_FORMAT: &CStr = cstr!("%s");
 
@@ -42,7 +46,7 @@ pub fn result_orig_ret<T: Copy>() -> T {
     unsafe { *((*META_GLOBALS).orig_ret as *mut T) }
 }
 
-pub fn set_meta_result(result: abi::META_RES) {
+pub fn set_result(result: abi::META_RES) {
     unsafe {
         (*META_GLOBALS).mres = result;
     }

@@ -3,6 +3,7 @@ use super::adapter;
 use super::engine;
 use super::entity_api2;
 use super::meta;
+use crate::adapter::bootstrap;
 use crate::util::log;
 
 #[unsafe(export_name = "GiveFnptrsToDll")]
@@ -10,10 +11,10 @@ pub extern "system" fn give_dll_pointers(
     funcs_from_engine: *mut abi::enginefuncs_t,
     globals_pointer: *mut abi::globalvars_t,
 ) {
-    log::info("GiveFnptrsToDll");
+    log::debug("GiveFnptrsToDll");
 
     if let Err(_) = meta::ENG_FUNCS.set(unsafe { *funcs_from_engine }) {
-        log::info("engine functions already setup");
+        log::debug("engine functions already setup");
     }
 
     unsafe {
@@ -27,20 +28,20 @@ pub extern "C" fn meta_query(
     plugin_info: *mut *mut abi::plugin_info_t,
     meta_util_funcs: *mut abi::mutil_funcs_t,
 ) -> ::std::os::raw::c_int {
-    log::info("Meta_Query");
+    log::debug("Meta_Query");
     unsafe {
         *plugin_info = &raw mut meta::PLUGIN_INFO;
     }
 
     if let Err(_) = meta::META_UTIL_FUNCS.set(unsafe { *meta_util_funcs }) {
-        log::info("mate functions already setup");
+        log::debug("meta functions already setup");
     }
 
     let plugin_required_version = meta::c_char_to_string(unsafe { meta::PLUGIN_INFO.ifvers });
     let engine_ifvers = meta::c_char_to_string(interface_version);
 
     if engine_ifvers != plugin_required_version {
-        adapter::alert("something went wrong");
+        log::error("engine interface version mismatch");
         return 0;
     }
 
@@ -51,7 +52,7 @@ static META_FUNCTION_TABLE: abi::META_FUNCTIONS = abi::META_FUNCTIONS {
     pfnGetEntityAPI: None,
     pfnGetEntityAPI_Post: None,
     pfnGetEntityAPI2: Some(entity_api2::get_api),
-    pfnGetEntityAPI2_Post: None,
+    pfnGetEntityAPI2_Post: Some(entity_api2::get_api_post),
     pfnGetNewDLLFunctions: None,
     pfnGetNewDLLFunctions_Post: None,
     pfnGetEngineFunctions: Some(engine::get_functions),
@@ -65,9 +66,9 @@ pub extern "C" fn meta_attach(
     meta_globals: *mut abi::meta_globals_t,
     gamedll_funcs: *mut abi::gamedll_funcs_t,
 ) -> ::std::os::raw::c_int {
-    log::info("Meta_Attach");
+    log::debug("Meta_Attach");
     if function_table.is_null() || meta_globals.is_null() || gamedll_funcs.is_null() {
-        adapter::alert("something went wrong");
+        log::error("meta_attach has null pointers");
         return 0;
     }
 
@@ -77,7 +78,8 @@ pub extern "C" fn meta_attach(
         meta::GAME_DLL_FUNCS = gamedll_funcs;
     }
 
-    adapter::console_log("rust plugin loaded");
+    bootstrap::load();
+    adapter::console_debug("rust plugin loaded");
 
     1
 }
@@ -88,7 +90,7 @@ pub extern "C" fn meta_detach(
     now: abi::PLUG_LOADTIME,
     reason: abi::PL_UNLOAD_REASON,
 ) -> ::std::os::raw::c_int {
-    log::info("Meta_Detach");
-    adapter::console_log("rust plugin unloaded");
+    log::debug("Meta_Detach");
+    adapter::console_debug("rust plugin unloaded");
     1
 }

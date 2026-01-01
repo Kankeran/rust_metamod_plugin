@@ -169,7 +169,7 @@ pub extern "C" fn get_functions(
     functions_from_engine: *mut abi::enginefuncs_t,
     interface_version: *mut ::std::os::raw::c_int,
 ) -> ::std::os::raw::c_int {
-    log::info("get_engine_functions");
+    log::debug("get_engine_functions");
     if functions_from_engine.is_null() {
         adapter::alert("something went wrong");
         return 0;
@@ -183,7 +183,7 @@ pub extern "C" fn get_functions(
         *functions_from_engine = ENG_FUNCS;
     }
 
-    adapter::console_log("engine funcs loaded");
+    adapter::console_debug("engine funcs loaded");
 
     1
 }
@@ -353,7 +353,7 @@ pub extern "C" fn get_functions_post(
     functions_from_engine: *mut abi::enginefuncs_t,
     interface_version: *mut ::std::os::raw::c_int,
 ) -> ::std::os::raw::c_int {
-    log::info("get_engine_functions");
+    log::debug("get_engine_functions");
     if functions_from_engine.is_null() {
         adapter::alert("something went wrong");
         return 0;
@@ -380,6 +380,6 @@ extern "C" fn reg_user_msg_post(
         unsafe { msgs::TEXT_MSG = Some(meta::result_orig_ret()) };
     }
 
-    meta::set_meta_result(abi::META_RES_MRES_IGNORED);
+    meta::set_result(abi::META_RES_MRES_IGNORED);
     0
 }

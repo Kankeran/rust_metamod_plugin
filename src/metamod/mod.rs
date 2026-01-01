@@ -1,10 +1,10 @@
 #[allow(dead_code, nonstandard_style)]
 mod abi;
-mod exports;
-mod meta;
+pub mod adapter;
 mod engine;
 mod entity_api2;
-mod meta_util;
+mod entry;
+mod exports;
+pub mod meta;
+pub mod meta_util;
 mod msgs;
-
-pub mod adapter;

@@ -14,12 +14,15 @@ pub fn console_log(msg: &str) {
     }
 }
 
+pub fn console_debug(msg: &str) {
+    #[cfg(debug_assertions)]
+    if let Ok(cmsg) = CString::new(msg) {
+        meta::console_log(cmsg.as_c_str());
+    }
+}
+
 pub fn alert(msg: &str) {
     if let Ok(cmsg) = CString::new(msg) {
         meta::alert(cmsg.as_c_str());
     }
-}
-
-pub fn client_print(msg: &str) {
-    
 }
