@@ -1,2 +1,3 @@
-[build]
-target = "i686-pc-windows-msvc"
+[alias]
+build-linux = "build --target i686-unknown-linux-gnu"
+build-win   = "build --target i686-pc-windows-msvc"

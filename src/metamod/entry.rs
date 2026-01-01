@@ -1,6 +1,6 @@
 use std::sync::OnceLock;
 
-use crate::metamod::abi;
+use crate::metamod::{abi, meta_api, meta_const};
 
 pub struct EntryFuncs {
     init: fn(),
@@ -37,5 +37,5 @@ pub fn client_command(id: i32, args: Vec<String>) -> i32 {
         return (entry_funcs.client_command)(id, args);
     }
 
-    abi::META_RES_MRES_IGNORED
+	meta_const::RESULT_IGNORED
 }

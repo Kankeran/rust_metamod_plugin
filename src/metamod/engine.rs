@@ -1,6 +1,6 @@
 //! [abi::META_FUNCTIONS::pfnGetEngineFunctions] and [abi::META_FUNCTIONS::pfnGetEngineFunctions_Post] implementations
 
-use crate::util::log;
+use crate::{metamod::meta_const, util::log};
 
 use super::{abi, meta, msgs};
 
@@ -400,6 +400,6 @@ extern "C" fn reg_user_msg_post(
         _ => (),
     };
 
-    meta::set_result(abi::META_RES_MRES_IGNORED);
+    meta::set_result(meta_const::RESULT_IGNORED);
     0
 }

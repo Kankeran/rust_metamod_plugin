@@ -88,7 +88,7 @@ pub extern "C" fn get_api(
 extern "C" fn spawn(_entity: *mut abi::edict_t) -> i32 {
     entry::meta_setup();
 
-    meta::set_result(abi::META_RES_MRES_IGNORED);
+    meta::set_result(meta_const::RESULT_IGNORED);
     0
 }
 
@@ -106,7 +106,7 @@ extern "C" fn client_connect(
             player_id, player_name
         ));
     }
-    meta::set_result(abi::META_RES_MRES_IGNORED);
+    meta::set_result(meta_const::RESULT_IGNORED);
 
     1
 }

@@ -46,9 +46,9 @@ pub fn result_orig_ret<T: Copy>() -> T {
     unsafe { *((*META_GLOBALS).orig_ret as *mut T) }
 }
 
-pub fn set_result(result: abi::META_RES) {
+pub fn set_result(result: i32) {
     unsafe {
-        (*META_GLOBALS).mres = result;
+        (*META_GLOBALS).mres = result as abi::META_RES;
     }
 }
 
