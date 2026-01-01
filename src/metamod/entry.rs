@@ -1,6 +1,6 @@
 use std::sync::OnceLock;
 
-use crate::metamod::{abi, meta};
+use crate::metamod::abi;
 
 pub struct EntryFuncs {
     init: fn(),
@@ -9,7 +9,7 @@ pub struct EntryFuncs {
 }
 
 impl EntryFuncs {
-    pub fn new(init: fn(), setup: fn(), client_command: fn(i32, Vec<String>)->i32) -> EntryFuncs {
+    pub fn new(init: fn(), setup: fn(), client_command: fn(i32, Vec<String>) -> i32) -> EntryFuncs {
         EntryFuncs {
             init,
             setup,
@@ -19,10 +19,6 @@ impl EntryFuncs {
 }
 
 pub static ENTRY_FUNCS: OnceLock<EntryFuncs> = OnceLock::new();
-
-pub static INIT_FUNC: OnceLock<fn()> = OnceLock::new();
-pub static SETUP_FUNC: OnceLock<fn()> = OnceLock::new();
-pub static CLIENT_COMMAND_FUNC: OnceLock<fn(i32, Vec<String>)> = OnceLock::new();
 
 pub fn meta_init() {
     if let Some(entry_funcs) = ENTRY_FUNCS.get() {
@@ -38,7 +34,7 @@ pub fn meta_setup() {
 
 pub fn client_command(id: i32, args: Vec<String>) -> i32 {
     if let Some(entry_funcs) = ENTRY_FUNCS.get() {
-       return (entry_funcs.client_command)(id, args)
+        return (entry_funcs.client_command)(id, args);
     }
 
     abi::META_RES_MRES_IGNORED

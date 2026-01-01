@@ -1,5 +1,4 @@
 use super::abi;
-use super::adapter;
 use super::engine;
 use super::entity_api2;
 use super::meta;
@@ -41,7 +40,7 @@ pub extern "C" fn meta_query(
     let engine_ifvers = meta::c_char_to_string(interface_version);
 
     if engine_ifvers != plugin_required_version {
-        log::error("engine interface version mismatch");
+        log::error("meta interface version mismatch");
         return 0;
     }
 
@@ -79,7 +78,6 @@ pub extern "C" fn meta_attach(
     }
 
     bootstrap::load();
-    adapter::console_debug("rust plugin loaded");
 
     1
 }
@@ -91,6 +89,5 @@ pub extern "C" fn meta_detach(
     reason: abi::PL_UNLOAD_REASON,
 ) -> ::std::os::raw::c_int {
     log::debug("Meta_Detach");
-    adapter::console_debug("rust plugin unloaded");
     1
 }

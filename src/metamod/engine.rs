@@ -1,6 +1,6 @@
 //! [abi::META_FUNCTIONS::pfnGetEngineFunctions] and [abi::META_FUNCTIONS::pfnGetEngineFunctions_Post] implementations
 
-use crate::{metamod::adapter, util::log};
+use crate::util::log;
 
 use super::{abi, meta, msgs};
 
@@ -171,19 +171,17 @@ pub extern "C" fn get_functions(
 ) -> ::std::os::raw::c_int {
     log::debug("get_engine_functions");
     if functions_from_engine.is_null() {
-        adapter::alert("something went wrong");
+        log::error("engine functions is null");
         return 0;
     }
     if unsafe { *interface_version } != abi::ENGINE_INTERFACE_VERSION as i32 {
-        adapter::alert("something went wrong");
+        log::error("engine interface version mismatch");
         return 0;
     }
 
     unsafe {
         *functions_from_engine = ENG_FUNCS;
     }
-
-    adapter::console_debug("engine funcs loaded");
 
     1
 }
@@ -355,11 +353,11 @@ pub extern "C" fn get_functions_post(
 ) -> ::std::os::raw::c_int {
     log::debug("get_engine_functions");
     if functions_from_engine.is_null() {
-        adapter::alert("something went wrong");
+        log::error("engine functions is null");
         return 0;
     }
     if unsafe { *interface_version } != abi::ENGINE_INTERFACE_VERSION as i32 {
-        adapter::alert("something went wrong");
+        log::error("engine interface version mismatch");
         return 0;
     }
 
@@ -376,9 +374,31 @@ extern "C" fn reg_user_msg_post(
 ) -> ::std::os::raw::c_int {
     let name = meta::c_char_to_string(name);
 
-    if name.eq("TextMsg") {
-        unsafe { msgs::TEXT_MSG = Some(meta::result_orig_ret()) };
-    }
+    match name.as_str() {
+        "TextMsg" => unsafe { msgs::TEXT_MSG = Some(meta::result_orig_ret()) },
+        "BarTime" => unsafe { msgs::BAR_TIME = Some(meta::result_orig_ret()) },
+        "CurWeapon" => unsafe { msgs::CUR_WEAPON = Some(meta::result_orig_ret()) },
+        "Damage" => unsafe { msgs::DAMAGE = Some(meta::result_orig_ret()) },
+        "DeathMsg" => unsafe { msgs::DEATH_MSG = Some(meta::result_orig_ret()) },
+        "TeamInfo" => unsafe { msgs::TEAM_INFO = Some(meta::result_orig_ret()) },
+        "WeaponList" => unsafe { msgs::WEAPON_LIST = Some(meta::result_orig_ret()) },
+        "MOTD" => unsafe { msgs::MOTD = Some(meta::result_orig_ret()) },
+        "ServerName" => unsafe { msgs::SERVER_NAME = Some(meta::result_orig_ret()) },
+        "Health" => unsafe { msgs::HEALTH = Some(meta::result_orig_ret()) },
+        "Battery" => unsafe { msgs::BATTERY = Some(meta::result_orig_ret()) },
+        "ShowMenu" => unsafe { msgs::SHOW_MENU = Some(meta::result_orig_ret()) },
+        "SendAudio" => unsafe { msgs::SEND_AUDIO = Some(meta::result_orig_ret()) },
+        "AmmoX" => unsafe { msgs::AMMO_X = Some(meta::result_orig_ret()) },
+        "ScoreInfo" => unsafe { msgs::SCORE_INFO = Some(meta::result_orig_ret()) },
+        "VGUIMenu" => unsafe { msgs::VGUI_MENU = Some(meta::result_orig_ret()) },
+        "AmmoPickup" => unsafe { msgs::AMMO_PICKUP = Some(meta::result_orig_ret()) },
+        "WeapPickup" => unsafe { msgs::WEAP_PICKUP = Some(meta::result_orig_ret()) },
+        "ResetHUD" => unsafe { msgs::RESET_HUD = Some(meta::result_orig_ret()) },
+        "RoundTime" => unsafe { msgs::ROUND_TIME = Some(meta::result_orig_ret()) },
+        "SayText" => unsafe { msgs::SAY_TEXT = Some(meta::result_orig_ret()) },
+        "InitHUD" => unsafe { msgs::INIT_HUD = Some(meta::result_orig_ret()) },
+        _ => (),
+    };
 
     meta::set_result(abi::META_RES_MRES_IGNORED);
     0

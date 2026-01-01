@@ -1,10 +1,22 @@
-
-
-// from amxconst.inc
-// enum {
-// 	print_notify = 1,
-// 	print_console,
-// 	print_chat,
-// 	print_center,
-// };
 pub static mut TEXT_MSG: Option<i32> = None;
+pub static mut BAR_TIME: Option<i32> = None;
+pub static mut CUR_WEAPON: Option<i32> = None;
+pub static mut DAMAGE: Option<i32> = None;
+pub static mut DEATH_MSG: Option<i32> = None;
+pub static mut TEAM_INFO: Option<i32> = None;
+pub static mut WEAPON_LIST: Option<i32> = None;
+pub static mut MOTD: Option<i32> = None;
+pub static mut SERVER_NAME: Option<i32> = None;
+pub static mut HEALTH: Option<i32> = None;
+pub static mut BATTERY: Option<i32> = None;
+pub static mut SHOW_MENU: Option<i32> = None;
+pub static mut SEND_AUDIO: Option<i32> = None;
+pub static mut AMMO_X: Option<i32> = None;
+pub static mut SCORE_INFO: Option<i32> = None;
+pub static mut VGUI_MENU: Option<i32> = None;
+pub static mut AMMO_PICKUP: Option<i32> = None;
+pub static mut WEAP_PICKUP: Option<i32> = None;
+pub static mut RESET_HUD: Option<i32> = None;
+pub static mut ROUND_TIME: Option<i32> = None;
+pub static mut SAY_TEXT: Option<i32> = None;
+pub static mut INIT_HUD: Option<i32> = None;

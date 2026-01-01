@@ -2,7 +2,7 @@ use std::sync::RwLock;
 
 use crate::{
     adapter::{api, convert},
-    metamod::meta_util,
+    metamod::meta_const,
 };
 
 static COMMANDS: RwLock<Vec<Command>> = RwLock::new(Vec::new());
@@ -12,7 +12,7 @@ pub fn add_client_command(command: Command) {
 }
 
 pub fn handle_client_command(id: i32, arguments: &Vec<String>) -> i32 {
-    let mut result = meta_util::RESULT_IGNORED;
+    let mut result = meta_const::RESULT_IGNORED;
     if let Ok(cmds) = COMMANDS.read() {
         let command = &arguments[0];
         let argument = &arguments[1];
@@ -20,9 +20,9 @@ pub fn handle_client_command(id: i32, arguments: &Vec<String>) -> i32 {
             if cmd.equal(command, argument) {
                 let res = (cmd.callback)(id, arguments);
                 if let api::Return::Supercede = res {
-                    return meta_util::RESULT_SUPERCEDE;
+                    return meta_const::RESULT_SUPERCEDE;
                 }
-                let res = convert::convert_result(res);
+                let res = convert::result(&res);
                 if res > result {
                     result = res
                 }

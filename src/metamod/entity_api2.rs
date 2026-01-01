@@ -1,11 +1,11 @@
 //! [abi::META_FUNCTIONS::pfnGetEntityAPI2] and [abi::META_FUNCTIONS::pfnGetEntityAPI2_Post] implementations
 
-use std::{ffi::CString, ptr::null_mut, result};
+use std::{cmp::max, ptr::null_mut};
 
 use cstr::cstr;
 
 use crate::{
-    metamod::{abi, adapter, entry, meta::{self, c_char_to_string}, meta_util},
+    metamod::{abi, adapter, entry, meta, meta_const},
     util::log,
 };
 
@@ -13,7 +13,7 @@ use super::msgs;
 
 static FUNCTION_TABLE: abi::DLL_FUNCTIONS = abi::DLL_FUNCTIONS {
     pfnGameInit: None,
-    pfnSpawn: None,
+    pfnSpawn: Some(spawn),
     pfnThink: None,
     pfnUse: None,
     pfnTouch: None,
@@ -70,11 +70,11 @@ pub extern "C" fn get_api(
 ) -> ::std::os::raw::c_int {
     log::debug("get_entity_api2");
     if function_table.is_null() {
-        adapter::alert("something went wrong");
+        log::error("metamod function table is null");
         return 0;
     }
     if unsafe { *interface_version } != abi::INTERFACE_VERSION as i32 {
-        adapter::alert("something went wrong");
+        log::error("half life interface version mismatch");
         return 0;
     }
 
@@ -82,9 +82,14 @@ pub extern "C" fn get_api(
         *function_table = FUNCTION_TABLE;
     }
 
-    adapter::console_debug("entity api2 loaded");
-
     1
+}
+
+extern "C" fn spawn(_entity: *mut abi::edict_t) -> i32 {
+    entry::meta_setup();
+
+    meta::set_result(abi::META_RES_MRES_IGNORED);
+    0
 }
 
 extern "C" fn client_connect(
@@ -93,8 +98,13 @@ extern "C" fn client_connect(
     _address: *const ::std::os::raw::c_char,
     _reject_reason: *mut ::std::os::raw::c_char,
 ) -> abi::qboolean {
-    if let (Some(player_id), player_name) = (meta::get_ent_index(entity), c_char_to_string(name)) {
-        adapter::console_debug(&format!("player with id {} and name {} is connecting", player_id, player_name));
+    if let (Some(player_id), player_name) =
+        (meta::get_ent_index(entity), meta::c_char_to_string(name))
+    {
+        adapter::console_debug(&format!(
+            "player with id {} and name {} is connecting",
+            player_id, player_name
+        ));
     }
     meta::set_result(abi::META_RES_MRES_IGNORED);
 
@@ -102,10 +112,9 @@ extern "C" fn client_connect(
 }
 
 extern "C" fn client_command(entity: *mut abi::edict_t) {
-
     if let (Some(player_id), Some(api)) = (meta::get_ent_index(entity), meta::ENG_FUNCS.get()) {
         if let (Some(argv_fn), Some(argc_fn)) = (api.pfnCmd_Argv, api.pfnCmd_Argc) {
-            let args_num = unsafe { argc_fn() };
+            let args_num = max(unsafe { argc_fn() }, 2); // need at least cmd and first argument, if first argument not exist then empty string is provided by engine
             let mut arguments: Vec<String> = Vec::with_capacity(args_num as usize);
             for n in 0..args_num {
                 let arg = unsafe { argv_fn(n) };
@@ -115,11 +124,11 @@ extern "C" fn client_command(entity: *mut abi::edict_t) {
                 }
             }
 
-           meta::set_result(entry::client_command(player_id, arguments));
+            meta::set_result(entry::client_command(player_id, arguments));
             return;
         }
-
     }
+    meta::set_result(meta_const::RESULT_IGNORED);
 }
 
 extern "C" fn server_activate(
@@ -129,6 +138,69 @@ extern "C" fn server_activate(
 ) {
     if let None = unsafe { msgs::TEXT_MSG } {
         unsafe { msgs::TEXT_MSG = meta::get_user_msg_id(cstr!("TextMsg"), null_mut()) };
+    }
+    if let None = unsafe { msgs::BAR_TIME } {
+        unsafe { msgs::BAR_TIME = meta::get_user_msg_id(cstr!("BarTime"), null_mut()) };
+    }
+    if let None = unsafe { msgs::CUR_WEAPON } {
+        unsafe { msgs::CUR_WEAPON = meta::get_user_msg_id(cstr!("CurWeapon"), null_mut()) };
+    }
+    if let None = unsafe { msgs::DAMAGE } {
+        unsafe { msgs::DAMAGE = meta::get_user_msg_id(cstr!("Damage"), null_mut()) };
+    }
+    if let None = unsafe { msgs::DEATH_MSG } {
+        unsafe { msgs::DEATH_MSG = meta::get_user_msg_id(cstr!("DeathMsg"), null_mut()) };
+    }
+    if let None = unsafe { msgs::TEAM_INFO } {
+        unsafe { msgs::TEAM_INFO = meta::get_user_msg_id(cstr!("TeamInfo"), null_mut()) };
+    }
+    if let None = unsafe { msgs::WEAPON_LIST } {
+        unsafe { msgs::WEAPON_LIST = meta::get_user_msg_id(cstr!("WeaponList"), null_mut()) };
+    }
+    if let None = unsafe { msgs::MOTD } {
+        unsafe { msgs::MOTD = meta::get_user_msg_id(cstr!("MOTD"), null_mut()) };
+    }
+    if let None = unsafe { msgs::SERVER_NAME } {
+        unsafe { msgs::SERVER_NAME = meta::get_user_msg_id(cstr!("ServerName"), null_mut()) };
+    }
+    if let None = unsafe { msgs::HEALTH } {
+        unsafe { msgs::HEALTH = meta::get_user_msg_id(cstr!("Health"), null_mut()) };
+    }
+    if let None = unsafe { msgs::BATTERY } {
+        unsafe { msgs::BATTERY = meta::get_user_msg_id(cstr!("Battery"), null_mut()) };
+    }
+    if let None = unsafe { msgs::SHOW_MENU } {
+        unsafe { msgs::SHOW_MENU = meta::get_user_msg_id(cstr!("ShowMenu"), null_mut()) };
+    }
+    if let None = unsafe { msgs::SEND_AUDIO } {
+        unsafe { msgs::SEND_AUDIO = meta::get_user_msg_id(cstr!("SendAudio"), null_mut()) };
+    }
+    if let None = unsafe { msgs::AMMO_X } {
+        unsafe { msgs::AMMO_X = meta::get_user_msg_id(cstr!("AmmoX"), null_mut()) };
+    }
+    if let None = unsafe { msgs::SCORE_INFO } {
+        unsafe { msgs::SCORE_INFO = meta::get_user_msg_id(cstr!("ScoreInfo"), null_mut()) };
+    }
+    if let None = unsafe { msgs::VGUI_MENU } {
+        unsafe { msgs::VGUI_MENU = meta::get_user_msg_id(cstr!("VGUIMenu"), null_mut()) };
+    }
+    if let None = unsafe { msgs::AMMO_PICKUP } {
+        unsafe { msgs::AMMO_PICKUP = meta::get_user_msg_id(cstr!("AmmoPickup"), null_mut()) };
+    }
+    if let None = unsafe { msgs::WEAP_PICKUP } {
+        unsafe { msgs::WEAP_PICKUP = meta::get_user_msg_id(cstr!("WeapPickup"), null_mut()) };
+    }
+    if let None = unsafe { msgs::RESET_HUD } {
+        unsafe { msgs::RESET_HUD = meta::get_user_msg_id(cstr!("ResetHUD"), null_mut()) };
+    }
+    if let None = unsafe { msgs::ROUND_TIME } {
+        unsafe { msgs::ROUND_TIME = meta::get_user_msg_id(cstr!("RoundTime"), null_mut()) };
+    }
+    if let None = unsafe { msgs::SAY_TEXT } {
+        unsafe { msgs::SAY_TEXT = meta::get_user_msg_id(cstr!("SayText"), null_mut()) };
+    }
+    if let None = unsafe { msgs::INIT_HUD } {
+        unsafe { msgs::INIT_HUD = meta::get_user_msg_id(cstr!("InitHUD"), null_mut()) };
     }
 }
 
@@ -202,8 +274,6 @@ pub extern "C" fn get_api_post(
     unsafe {
         *function_table = FUNCTION_TABLE_POST;
     }
-
-    adapter::console_debug("entity api2 post loaded");
 
     1
 }
