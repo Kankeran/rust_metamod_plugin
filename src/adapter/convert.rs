@@ -48,3 +48,97 @@ pub fn user_msg_id(msg: &api::UserMsgs) -> Option<i32> {
         api::UserMsgs::InitHud => meta_api::get_init_hud_id(),
     }
 }
+
+pub fn user_msg(msg_id: i32) -> Option<api::UserMsgs> {
+    if let Some(id) = meta_api::get_text_msg_id()
+        && msg_id == id
+    {
+        Some(api::UserMsgs::TextMsg)
+    } else if let Some(id) = meta_api::get_bar_time_id()
+        && msg_id == id
+    {
+        Some(api::UserMsgs::BarTime)
+    } else if let Some(id) = meta_api::get_cur_weapon_id()
+        && msg_id == id
+    {
+        Some(api::UserMsgs::CurWeapon)
+    } else if let Some(id) = meta_api::get_damage_id()
+        && msg_id == id
+    {
+        Some(api::UserMsgs::Damage)
+    } else if let Some(id) = meta_api::get_death_msg_id()
+        && msg_id == id
+    {
+        Some(api::UserMsgs::DeathMsg)
+    } else if let Some(id) = meta_api::get_team_info_id()
+        && msg_id == id
+    {
+        Some(api::UserMsgs::TeamInfo)
+    } else if let Some(id) = meta_api::get_weapon_list_id()
+        && msg_id == id
+    {
+        Some(api::UserMsgs::WeaponList)
+    } else if let Some(id) = meta_api::get_motd_id()
+        && msg_id == id
+    {
+        Some(api::UserMsgs::MOTD)
+    } else if let Some(id) = meta_api::get_server_name_id()
+        && msg_id == id
+    {
+        Some(api::UserMsgs::ServerName)
+    } else if let Some(id) = meta_api::get_health_id()
+        && msg_id == id
+    {
+        Some(api::UserMsgs::Health)
+    } else if let Some(id) = meta_api::get_battery_id()
+        && msg_id == id
+    {
+        Some(api::UserMsgs::Battery)
+    } else if let Some(id) = meta_api::get_show_menu_id()
+        && msg_id == id
+    {
+        Some(api::UserMsgs::ShowMenu)
+    } else if let Some(id) = meta_api::get_send_audio_id()
+        && msg_id == id
+    {
+        Some(api::UserMsgs::SendAudio)
+    } else if let Some(id) = meta_api::get_ammo_x_id()
+        && msg_id == id
+    {
+        Some(api::UserMsgs::AmmoX)
+    } else if let Some(id) = meta_api::get_score_info_id()
+        && msg_id == id
+    {
+        Some(api::UserMsgs::ScoreInfo)
+    } else if let Some(id) = meta_api::get_vgui_menu_id()
+        && msg_id == id
+    {
+        Some(api::UserMsgs::VguiMenu)
+    } else if let Some(id) = meta_api::get_ammo_pickup_id()
+        && msg_id == id
+    {
+        Some(api::UserMsgs::AmmoPickup)
+    } else if let Some(id) = meta_api::get_weap_pickup_id()
+        && msg_id == id
+    {
+        Some(api::UserMsgs::WeapPickup)
+    } else if let Some(id) = meta_api::get_reset_hud_id()
+        && msg_id == id
+    {
+        Some(api::UserMsgs::ResetHud)
+    } else if let Some(id) = meta_api::get_round_time_id()
+        && msg_id == id
+    {
+        Some(api::UserMsgs::RoundTime)
+    } else if let Some(id) = meta_api::get_say_text_id()
+        && msg_id == id
+    {
+        Some(api::UserMsgs::SayText)
+    } else if let Some(id) = meta_api::get_init_hud_id()
+        && msg_id == id
+    {
+        Some(api::UserMsgs::InitHud)
+    } else {
+        None
+    }
+}

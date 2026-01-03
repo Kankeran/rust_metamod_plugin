@@ -3,12 +3,12 @@
 
 ### Linux
 ```bash
-bindgen metamod.h -o src/metamod/abi/linux.rs -- -x c++ -target i686-unknown-linux-gnu
+bindgen metamod.h --with-derive-default -o src/metamod/abi/linux.rs -- -x c++ -target i686-unknown-linux-gnu
 ```
 
 ### Windows
 ```bash
-bindgen metamod.h -o src/metamod/abi/windows.rs -- -x c++ -target i686-pc-windows-msvc
+bindgen metamod.h --with-derive-default -o src/metamod/abi/windows.rs -- -x c++ -target i686-pc-windows-msvc
 ```
 
 

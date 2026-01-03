@@ -1,8 +1,8 @@
 use std::ffi::CString;
 
 use crate::{
-    adapter::{command, convert, entry, messages::TextMessage},
-    metamod::{meta, meta_const},
+    adapter::{command, entry, messages::TextMessage},
+    metamod::{meta},
 };
 
 pub enum Return {
@@ -20,6 +20,7 @@ pub enum PrintMode {
     PrintCenter,
 }
 
+#[derive(Debug)]
 pub enum UserMsgs {
     TextMsg,
     BarTime,

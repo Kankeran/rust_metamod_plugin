@@ -1,169 +1,27 @@
 //! [abi::META_FUNCTIONS::pfnGetEngineFunctions] and [abi::META_FUNCTIONS::pfnGetEngineFunctions_Post] implementations
 
-use crate::{metamod::meta_const, util::log};
+use std::sync::LazyLock;
+
+use crate::{
+    metamod::{entry, meta_const},
+    util::log,
+};
 
 use super::{abi, meta, msgs};
 
-static ENG_FUNCS: abi::enginefuncs_t = abi::enginefuncs_t {
-    pfnPrecacheModel: None,
-    pfnPrecacheSound: None,
-    pfnSetModel: None,
-    pfnModelIndex: None,
-    pfnModelFrames: None,
-    pfnSetSize: None,
-    pfnChangeLevel: None,
-    pfnGetSpawnParms: None,
-    pfnSaveSpawnParms: None,
-    pfnVecToYaw: None,
-    pfnVecToAngles: None,
-    pfnMoveToOrigin: None,
-    pfnChangeYaw: None,
-    pfnChangePitch: None,
-    pfnFindEntityByString: None,
-    pfnGetEntityIllum: None,
-    pfnFindEntityInSphere: None,
-    pfnFindClientInPVS: None,
-    pfnEntitiesInPVS: None,
-    pfnMakeVectors: None,
-    pfnAngleVectors: None,
-    pfnCreateEntity: None,
-    pfnRemoveEntity: None,
-    pfnCreateNamedEntity: None,
-    pfnMakeStatic: None,
-    pfnEntIsOnFloor: None,
-    pfnDropToFloor: None,
-    pfnWalkMove: None,
-    pfnSetOrigin: None,
-    pfnEmitSound: None,
-    pfnEmitAmbientSound: None,
-    pfnTraceLine: None,
-    pfnTraceToss: None,
-    pfnTraceMonsterHull: None,
-    pfnTraceHull: None,
-    pfnTraceModel: None,
-    pfnTraceTexture: None,
-    pfnTraceSphere: None,
-    pfnGetAimVector: None,
-    pfnServerCommand: None,
-    pfnServerExecute: None,
-    pfnClientCommand: None,
-    pfnParticleEffect: None,
-    pfnLightStyle: None,
-    pfnDecalIndex: None,
-    pfnPointContents: None,
-    pfnMessageBegin: None,
-    pfnMessageEnd: None,
-    pfnWriteByte: None,
-    pfnWriteChar: None,
-    pfnWriteShort: None,
-    pfnWriteLong: None,
-    pfnWriteAngle: None,
-    pfnWriteCoord: None,
-    pfnWriteString: None,
-    pfnWriteEntity: None,
-    pfnCVarRegister: None,
-    pfnCVarGetFloat: None,
-    pfnCVarGetString: None,
-    pfnCVarSetFloat: None,
-    pfnCVarSetString: None,
-    pfnAlertMessage: None,
-    pfnEngineFprintf: None,
-    pfnPvAllocEntPrivateData: None,
-    pfnPvEntPrivateData: None,
-    pfnFreeEntPrivateData: None,
-    pfnSzFromIndex: None,
-    pfnAllocString: None,
-    pfnGetVarsOfEnt: None,
-    pfnPEntityOfEntOffset: None,
-    pfnEntOffsetOfPEntity: None,
-    pfnIndexOfEdict: None,
-    pfnPEntityOfEntIndex: None,
-    pfnFindEntityByVars: None,
-    pfnGetModelPtr: None,
-    pfnRegUserMsg: None,
-    pfnAnimationAutomove: None,
-    pfnGetBonePosition: None,
-    pfnFunctionFromName: None,
-    pfnNameForFunction: None,
-    pfnClientPrintf: None,
-    pfnServerPrint: None,
-    pfnCmd_Args: None,
-    pfnCmd_Argv: None,
-    pfnCmd_Argc: None,
-    pfnGetAttachment: None,
-    pfnCRC32_Init: None,
-    pfnCRC32_ProcessBuffer: None,
-    pfnCRC32_ProcessByte: None,
-    pfnCRC32_Final: None,
-    pfnRandomLong: None,
-    pfnRandomFloat: None,
-    pfnSetView: None,
-    pfnTime: None,
-    pfnCrosshairAngle: None,
-    pfnLoadFileForMe: None,
-    pfnFreeFile: None,
-    pfnEndSection: None,
-    pfnCompareFileTime: None,
-    pfnGetGameDir: None,
-    pfnCvar_RegisterVariable: None,
-    pfnFadeClientVolume: None,
-    pfnSetClientMaxspeed: None,
-    pfnCreateFakeClient: None,
-    pfnRunPlayerMove: None,
-    pfnNumberOfEntities: None,
-    pfnGetInfoKeyBuffer: None,
-    pfnInfoKeyValue: None,
-    pfnSetKeyValue: None,
-    pfnSetClientKeyValue: None,
-    pfnIsMapValid: None,
-    pfnStaticDecal: None,
-    pfnPrecacheGeneric: None,
-    pfnGetPlayerUserId: None,
-    pfnBuildSoundMsg: None,
-    pfnIsDedicatedServer: None,
-    pfnCVarGetPointer: None,
-    pfnGetPlayerWONId: None,
-    pfnInfo_RemoveKey: None,
-    pfnGetPhysicsKeyValue: None,
-    pfnSetPhysicsKeyValue: None,
-    pfnGetPhysicsInfoString: None,
-    pfnPrecacheEvent: None,
-    pfnPlaybackEvent: None,
-    pfnSetFatPVS: None,
-    pfnSetFatPAS: None,
-    pfnCheckVisibility: None,
-    pfnDeltaSetField: None,
-    pfnDeltaUnsetField: None,
-    pfnDeltaAddEncoder: None,
-    pfnGetCurrentPlayer: None,
-    pfnCanSkipPlayer: None,
-    pfnDeltaFindField: None,
-    pfnDeltaSetFieldByIndex: None,
-    pfnDeltaUnsetFieldByIndex: None,
-    pfnSetGroupMask: None,
-    pfnCreateInstancedBaseline: None,
-    pfnCvar_DirectSet: None,
-    pfnForceUnmodified: None,
-    pfnGetPlayerStats: None,
-    pfnAddServerCommand: None,
-    pfnVoice_GetClientListening: None,
-    pfnVoice_SetClientListening: None,
-    pfnGetPlayerAuthId: None,
-    pfnSequenceGet: None,
-    pfnSequencePickSentence: None,
-    pfnGetFileSize: None,
-    pfnGetApproxWavePlayLen: None,
-    pfnIsCareerMatch: None,
-    pfnGetLocalizedStringLength: None,
-    pfnRegisterTutorMessageShown: None,
-    pfnGetTimesTutorMessageShown: None,
-    pfnProcessTutorMessageDecayBuffer: None,
-    pfnConstructTutorMessageDecayBuffer: None,
-    pfnResetTutorMessageDecayData: None,
-    pfnQueryClientCvarValue: None,
-    pfnQueryClientCvarValue2: None,
-    pfnCheckParm: None,
-};
+static ENG_FUNCS: LazyLock<abi::enginefuncs_t> = LazyLock::new(|| abi::enginefuncs_t {
+    pfnMessageBegin: Some(message_begin),
+    pfnMessageEnd: Some(message_end),
+    pfnWriteByte: Some(write_byte),
+    pfnWriteChar: Some(write_char),
+    pfnWriteShort: Some(write_short),
+    pfnWriteLong: Some(write_long),
+    pfnWriteAngle: Some(write_angle),
+    pfnWriteCoord: Some(write_coord),
+    pfnWriteString: Some(write_string),
+    pfnWriteEntity: Some(write_entity),
+    ..Default::default()
+});
 
 pub extern "C" fn get_functions(
     functions_from_engine: *mut abi::enginefuncs_t,
@@ -180,172 +38,71 @@ pub extern "C" fn get_functions(
     }
 
     unsafe {
-        *functions_from_engine = ENG_FUNCS;
+        *functions_from_engine = *ENG_FUNCS;
     }
 
     1
 }
 
-static ENG_FUNCS_POST: abi::enginefuncs_t = abi::enginefuncs_t {
-    pfnPrecacheModel: None,
-    pfnPrecacheSound: None,
-    pfnSetModel: None,
-    pfnModelIndex: None,
-    pfnModelFrames: None,
-    pfnSetSize: None,
-    pfnChangeLevel: None,
-    pfnGetSpawnParms: None,
-    pfnSaveSpawnParms: None,
-    pfnVecToYaw: None,
-    pfnVecToAngles: None,
-    pfnMoveToOrigin: None,
-    pfnChangeYaw: None,
-    pfnChangePitch: None,
-    pfnFindEntityByString: None,
-    pfnGetEntityIllum: None,
-    pfnFindEntityInSphere: None,
-    pfnFindClientInPVS: None,
-    pfnEntitiesInPVS: None,
-    pfnMakeVectors: None,
-    pfnAngleVectors: None,
-    pfnCreateEntity: None,
-    pfnRemoveEntity: None,
-    pfnCreateNamedEntity: None,
-    pfnMakeStatic: None,
-    pfnEntIsOnFloor: None,
-    pfnDropToFloor: None,
-    pfnWalkMove: None,
-    pfnSetOrigin: None,
-    pfnEmitSound: None,
-    pfnEmitAmbientSound: None,
-    pfnTraceLine: None,
-    pfnTraceToss: None,
-    pfnTraceMonsterHull: None,
-    pfnTraceHull: None,
-    pfnTraceModel: None,
-    pfnTraceTexture: None,
-    pfnTraceSphere: None,
-    pfnGetAimVector: None,
-    pfnServerCommand: None,
-    pfnServerExecute: None,
-    pfnClientCommand: None,
-    pfnParticleEffect: None,
-    pfnLightStyle: None,
-    pfnDecalIndex: None,
-    pfnPointContents: None,
-    pfnMessageBegin: None,
-    pfnMessageEnd: None,
-    pfnWriteByte: None,
-    pfnWriteChar: None,
-    pfnWriteShort: None,
-    pfnWriteLong: None,
-    pfnWriteAngle: None,
-    pfnWriteCoord: None,
-    pfnWriteString: None,
-    pfnWriteEntity: None,
-    pfnCVarRegister: None,
-    pfnCVarGetFloat: None,
-    pfnCVarGetString: None,
-    pfnCVarSetFloat: None,
-    pfnCVarSetString: None,
-    pfnAlertMessage: None,
-    pfnEngineFprintf: None,
-    pfnPvAllocEntPrivateData: None,
-    pfnPvEntPrivateData: None,
-    pfnFreeEntPrivateData: None,
-    pfnSzFromIndex: None,
-    pfnAllocString: None,
-    pfnGetVarsOfEnt: None,
-    pfnPEntityOfEntOffset: None,
-    pfnEntOffsetOfPEntity: None,
-    pfnIndexOfEdict: None,
-    pfnPEntityOfEntIndex: None,
-    pfnFindEntityByVars: None,
-    pfnGetModelPtr: None,
+extern "C" fn message_begin(
+    msg_dest: ::std::os::raw::c_int,
+    msg_type: ::std::os::raw::c_int,
+    origin: *const f32,
+    ed: *mut abi::edict_t,
+) {
+    meta::set_result(entry::message_begin(msg_dest, msg_type, origin, ed));
+}
+
+extern "C" fn write_byte(value: ::std::os::raw::c_int) {
+    meta::set_result(entry::write_byte(value));
+}
+
+extern "C" fn write_char(value: ::std::os::raw::c_int) {
+    meta::set_result(entry::write_char(value));
+}
+
+extern "C" fn write_short(value: ::std::os::raw::c_int) {
+    meta::set_result(entry::write_short(value));
+}
+
+extern "C" fn write_long(value: ::std::os::raw::c_int) {
+    meta::set_result(entry::write_long(value));
+}
+
+extern "C" fn write_angle(value: f32) {
+    meta::set_result(entry::write_angle(value));
+}
+
+extern "C" fn write_coord(value: f32) {
+    meta::set_result(entry::write_coord(value));
+}
+
+extern "C" fn write_string(value: *const ::std::os::raw::c_char) {
+    meta::set_result(entry::write_string(value));
+}
+
+extern "C" fn write_entity(value: ::std::os::raw::c_int) {
+    meta::set_result(entry::write_entity(value));
+}
+
+extern "C" fn message_end() {
+    meta::set_result(entry::message_end());
+}
+
+static ENG_FUNCS_POST: LazyLock<abi::enginefuncs_t> = LazyLock::new(|| abi::enginefuncs_t {
     pfnRegUserMsg: Some(reg_user_msg_post),
-    pfnAnimationAutomove: None,
-    pfnGetBonePosition: None,
-    pfnFunctionFromName: None,
-    pfnNameForFunction: None,
-    pfnClientPrintf: None,
-    pfnServerPrint: None,
-    pfnCmd_Args: None,
-    pfnCmd_Argv: None,
-    pfnCmd_Argc: None,
-    pfnGetAttachment: None,
-    pfnCRC32_Init: None,
-    pfnCRC32_ProcessBuffer: None,
-    pfnCRC32_ProcessByte: None,
-    pfnCRC32_Final: None,
-    pfnRandomLong: None,
-    pfnRandomFloat: None,
-    pfnSetView: None,
-    pfnTime: None,
-    pfnCrosshairAngle: None,
-    pfnLoadFileForMe: None,
-    pfnFreeFile: None,
-    pfnEndSection: None,
-    pfnCompareFileTime: None,
-    pfnGetGameDir: None,
-    pfnCvar_RegisterVariable: None,
-    pfnFadeClientVolume: None,
-    pfnSetClientMaxspeed: None,
-    pfnCreateFakeClient: None,
-    pfnRunPlayerMove: None,
-    pfnNumberOfEntities: None,
-    pfnGetInfoKeyBuffer: None,
-    pfnInfoKeyValue: None,
-    pfnSetKeyValue: None,
-    pfnSetClientKeyValue: None,
-    pfnIsMapValid: None,
-    pfnStaticDecal: None,
-    pfnPrecacheGeneric: None,
-    pfnGetPlayerUserId: None,
-    pfnBuildSoundMsg: None,
-    pfnIsDedicatedServer: None,
-    pfnCVarGetPointer: None,
-    pfnGetPlayerWONId: None,
-    pfnInfo_RemoveKey: None,
-    pfnGetPhysicsKeyValue: None,
-    pfnSetPhysicsKeyValue: None,
-    pfnGetPhysicsInfoString: None,
-    pfnPrecacheEvent: None,
-    pfnPlaybackEvent: None,
-    pfnSetFatPVS: None,
-    pfnSetFatPAS: None,
-    pfnCheckVisibility: None,
-    pfnDeltaSetField: None,
-    pfnDeltaUnsetField: None,
-    pfnDeltaAddEncoder: None,
-    pfnGetCurrentPlayer: None,
-    pfnCanSkipPlayer: None,
-    pfnDeltaFindField: None,
-    pfnDeltaSetFieldByIndex: None,
-    pfnDeltaUnsetFieldByIndex: None,
-    pfnSetGroupMask: None,
-    pfnCreateInstancedBaseline: None,
-    pfnCvar_DirectSet: None,
-    pfnForceUnmodified: None,
-    pfnGetPlayerStats: None,
-    pfnAddServerCommand: None,
-    pfnVoice_GetClientListening: None,
-    pfnVoice_SetClientListening: None,
-    pfnGetPlayerAuthId: None,
-    pfnSequenceGet: None,
-    pfnSequencePickSentence: None,
-    pfnGetFileSize: None,
-    pfnGetApproxWavePlayLen: None,
-    pfnIsCareerMatch: None,
-    pfnGetLocalizedStringLength: None,
-    pfnRegisterTutorMessageShown: None,
-    pfnGetTimesTutorMessageShown: None,
-    pfnProcessTutorMessageDecayBuffer: None,
-    pfnConstructTutorMessageDecayBuffer: None,
-    pfnResetTutorMessageDecayData: None,
-    pfnQueryClientCvarValue: None,
-    pfnQueryClientCvarValue2: None,
-    pfnCheckParm: None,
-};
+    pfnMessageBegin: Some(message_begin_post),
+    pfnMessageEnd: Some(message_end_post),
+    pfnWriteByte: Some(write_byte_post),
+    pfnWriteChar: Some(write_char_post),
+    pfnWriteShort: Some(write_short_post),
+    pfnWriteLong: Some(write_long_post),
+    pfnWriteAngle: Some(write_angle_post),
+    pfnWriteCoord: Some(write_coord_post),
+    pfnWriteString: Some(write_string_post),
+    pfnWriteEntity: Some(write_entity_post),
+    ..Default::default()
+});
 
 pub extern "C" fn get_functions_post(
     functions_from_engine: *mut abi::enginefuncs_t,
@@ -362,7 +119,7 @@ pub extern "C" fn get_functions_post(
     }
 
     unsafe {
-        *functions_from_engine = ENG_FUNCS_POST;
+        *functions_from_engine = *ENG_FUNCS_POST;
     }
 
     1
@@ -402,4 +159,49 @@ extern "C" fn reg_user_msg_post(
 
     meta::set_result(meta_const::RESULT_IGNORED);
     0
+}
+
+extern "C" fn message_begin_post(
+    msg_dest: ::std::os::raw::c_int,
+    msg_type: ::std::os::raw::c_int,
+    origin: *const f32,
+    ed: *mut abi::edict_t,
+) {
+    meta::set_result(entry::message_begin_post(msg_dest, msg_type, origin, ed))
+}
+
+extern "C" fn write_byte_post(value: ::std::os::raw::c_int) {
+    meta::set_result(entry::write_byte_post(value));
+}
+
+extern "C" fn write_char_post(value: ::std::os::raw::c_int) {
+    meta::set_result(entry::write_char_post(value));
+}
+
+extern "C" fn write_short_post(value: ::std::os::raw::c_int) {
+    meta::set_result(entry::write_short_post(value));
+}
+
+extern "C" fn write_long_post(value: ::std::os::raw::c_int) {
+    meta::set_result(entry::write_long_post(value));
+}
+
+extern "C" fn write_angle_post(value: f32) {
+    meta::set_result(entry::write_angle_post(value));
+}
+
+extern "C" fn write_coord_post(value: f32) {
+    meta::set_result(entry::write_coord_post(value));
+}
+
+extern "C" fn write_string_post(value: *const ::std::os::raw::c_char) {
+    meta::set_result(entry::write_string_post(value));
+}
+
+extern "C" fn write_entity_post(value: ::std::os::raw::c_int) {
+    meta::set_result(entry::write_entity_post(value));
+}
+
+extern "C" fn message_end_post() {
+    meta::set_result(entry::message_end_post());
 }

@@ -1,4 +1,56 @@
-use crate::metamod::msgs;
+use crate::metamod::{abi, entry, msgs};
+
+pub fn setup_entry(
+    init: fn(),
+    setup: fn(),
+    client_command: fn(i32, Vec<String>) -> i32,
+    message_begin: fn(i32, i32, *const f32, *mut abi::edict_t) -> i32,
+    write_byte: fn(i32) -> i32,
+    write_char: fn(i32) -> i32,
+    write_short: fn(i32) -> i32,
+    write_long: fn(i32) -> i32,
+    write_angle: fn(f32) -> i32,
+    write_coord: fn(f32) -> i32,
+    write_string: fn(String) -> i32,
+    write_entity: fn(i32) -> i32,
+    message_end: fn() -> i32,
+    message_begin_post: fn(i32, i32, *const f32, *mut abi::edict_t) -> i32,
+    write_byte_post: fn(i32) -> i32,
+    write_char_post: fn(i32) -> i32,
+    write_short_post: fn(i32) -> i32,
+    write_long_post: fn(i32) -> i32,
+    write_angle_post: fn(f32) -> i32,
+    write_coord_post: fn(f32) -> i32,
+    write_string_post: fn(String) -> i32,
+    write_entity_post: fn(i32) -> i32,
+    message_end_post: fn() -> i32,
+) {
+    let _ = entry::ENTRY_FUNCS.set(entry::EntryFuncs::new(
+        init,
+        setup,
+        client_command,
+        message_begin,
+        write_byte,
+        write_char,
+        write_short,
+        write_long,
+        write_angle,
+        write_coord,
+        write_string,
+        write_entity,
+        message_end,
+        message_begin_post,
+        write_byte_post,
+        write_char_post,
+        write_short_post,
+        write_long_post,
+        write_angle_post,
+        write_coord_post,
+        write_string_post,
+        write_entity_post,
+        message_end_post,
+    ));
+}
 
 pub fn get_text_msg_id() -> Option<i32> {
     unsafe { msgs::TEXT_MSG }

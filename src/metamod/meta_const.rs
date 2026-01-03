@@ -18,6 +18,9 @@ pub const MSG_PVS_R: i32 = 6;
 pub const MSG_PAS_R: i32 = 7;
 pub const MSG_ONE_UNRELIABLE: i32 = 8;
 pub const MSG_SPEC: i32 = 9;
+
 pub const MAX_LEVEL_CONNECTIONS: i32 = 16;
 pub const MAX_QPATH: i32 = 64;
+
+pub const MAX_WEAPONS: i32 = 32;
 

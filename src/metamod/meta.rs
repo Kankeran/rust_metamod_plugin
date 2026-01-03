@@ -1,13 +1,9 @@
-use super::{abi, entry};
+use super::abi;
 use cstr::cstr;
 use std::{
     ffi::{CStr, c_char},
     sync::OnceLock,
 };
-
-pub fn setup_entry(init: fn(), setup: fn(), client_command: fn(i32, Vec<String>)->i32) {
-    let _ = entry::ENTRY_FUNCS.set(entry::EntryFuncs::new(init, setup, client_command));
-}
 
 static PRINT_FORMAT: &CStr = cstr!("%s");
 
