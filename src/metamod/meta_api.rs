@@ -2,6 +2,7 @@ use std::{ffi::{CStr, CString}, ptr};
 
 use crate::metamod::{abi, entry, meta, msgs};
 
+#[derive(Debug)]
 pub struct EdictPtr(*mut abi::edict_t);
 
 unsafe impl Sync for EdictPtr {}

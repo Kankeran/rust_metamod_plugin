@@ -40,7 +40,7 @@ pub extern "C" fn meta_query(
     let engine_ifvers = meta::c_char_to_string(interface_version);
 
     if engine_ifvers != plugin_required_version {
-        log::error("meta interface version mismatch");
+        log::error(&format!("meta interface version mismatch, expected {}, got {}", &plugin_required_version, &engine_ifvers));
         return 0;
     }
 
