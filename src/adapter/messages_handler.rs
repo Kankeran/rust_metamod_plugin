@@ -5,7 +5,8 @@ use crate::{
         api::{self, BlockMode},
         convert,
     },
-    metamod::{meta_api, meta_const}, util::log,
+    metamod::{meta_api, meta_const},
+    util::log,
 };
 
 static MSG: Mutex<Option<RawMessage>> = Mutex::new(None);
@@ -16,6 +17,13 @@ static mut MSG_HOOKS: [bool; 256] = [false; 256];
 static mut MSG_TYPE_CURRENT: i32 = 0;
 static mut HOOK_CURRENT: bool = false;
 static mut BLOCK_CURRENT: bool = false;
+
+pub fn handle_msg(msg_type: api::UserMsgs) {
+    if let Some(msg_type) = convert::user_msg_id(&msg_type) {
+
+        unsafe {MSG_HOOKS[msg_type as usize] = true}
+    }
+}
 
 #[derive(Debug)]
 pub struct RawMessage {
@@ -60,6 +68,27 @@ impl RawMessage {
 
     fn handle_message(self) {
         // parse to specific message and handle callbacks here :)
+        log::debug(&format!("msg: {:?}", self));
+        self.send();
+    }
+
+    fn send(&self) {
+        meta_api::message_begin(self.msg_dest, self.msg_type, self.origin, self.ent.as_ref());
+
+        for value in self.data.iter() {
+            match value {
+                MessageValue::Byte(value) => meta_api::write_byte(*value),
+                MessageValue::Char(value) => meta_api::write_char(*value),
+                MessageValue::Short(value) => meta_api::write_short(*value),
+                MessageValue::Long(value) => meta_api::write_long(*value),
+                MessageValue::Angle(value) => meta_api::write_angle(*value),
+                MessageValue::Coord(value) => meta_api::write_coord(*value),
+                MessageValue::String(value) => meta_api::write_string(value),
+                MessageValue::Entity(value) => meta_api::write_entity(*value),
+            };
+        }
+
+        meta_api::message_end();
     }
 }
 
@@ -74,8 +103,13 @@ pub fn message_begin(
     } else {
         0
     };
-    api::console_debug(&format!("message_begin | msg_type {:?} | ent {:?}", convert::user_msg(msg_type), id));
-    if let BlockMode::BlockAll|BlockMode::BlockOne = unsafe { MSG_BLOCKS[msg_type as usize] } {
+    api::console_debug(&format!(
+        "message_begin | msg_type {:?} ({}) | ent {:?}",
+        convert::user_msg(msg_type),
+        msg_type,
+        id
+    ));
+    if let BlockMode::BlockAll | BlockMode::BlockOne = unsafe { MSG_BLOCKS[msg_type as usize] } {
         log::debug("block message");
         unsafe {
             BLOCK_CURRENT = true;

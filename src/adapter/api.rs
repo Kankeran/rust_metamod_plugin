@@ -6,6 +6,7 @@ use crate::{
 };
 
 pub use meta_api::EdictPtr;
+pub use crate::adapter::messages_handler::handle_msg;
 
 pub enum Return {
     Ignored,

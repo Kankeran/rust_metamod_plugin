@@ -13,6 +13,7 @@ pub fn plugin_init() {
         on_class_command,
     );
     api::register_client_command(String::from("rust_test"), None, on_rust_test);
+    api::handle_msg(api::UserMsgs::Damage);
 }
 
 pub fn plugin_precache() {}
