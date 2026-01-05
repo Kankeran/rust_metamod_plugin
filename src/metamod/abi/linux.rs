@@ -42,6 +42,15 @@ const _: () = {
     ["Offset of field: link_s::prev"][::std::mem::offset_of!(link_s, prev) - 0usize];
     ["Offset of field: link_s::next"][::std::mem::offset_of!(link_s, next) - 4usize];
 };
+impl Default for link_s {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
 pub type link_t = link_s;
 pub type edict_t = edict_s;
 pub type func_t = ::std::os::raw::c_uint;
@@ -50,7 +59,7 @@ pub type vec_t = f32;
 pub type byte = ::std::os::raw::c_uchar;
 pub type word = ::std::os::raw::c_ushort;
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct Vector2D {
     pub x: vec_t,
     pub y: vec_t,
@@ -63,7 +72,7 @@ const _: () = {
     ["Offset of field: Vector2D::y"][::std::mem::offset_of!(Vector2D, y) - 4usize];
 };
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct Vector {
     pub x: vec_t,
     pub y: vec_t,
@@ -176,6 +185,15 @@ const _: () = {
     ["Offset of field: globalvars_t::vecLandmarkOffset"]
         [::std::mem::offset_of!(globalvars_t, vecLandmarkOffset) - 160usize];
 };
+impl Default for globalvars_t {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct entvars_s {
@@ -495,6 +513,15 @@ const _: () = {
     ["Offset of field: entvars_s::euser3"][::std::mem::offset_of!(entvars_s, euser3) - 668usize];
     ["Offset of field: entvars_s::euser4"][::std::mem::offset_of!(entvars_s, euser4) - 672usize];
 };
+impl Default for entvars_s {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
 pub type entvars_t = entvars_s;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -525,6 +552,15 @@ const _: () = {
         [::std::mem::offset_of!(edict_s, pvPrivateData) - 124usize];
     ["Offset of field: edict_s::v"][::std::mem::offset_of!(edict_s, v) - 128usize];
 };
+impl Default for edict_s {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct TraceResult {
@@ -563,6 +599,15 @@ const _: () = {
     ["Offset of field: TraceResult::iHitgroup"]
         [::std::mem::offset_of!(TraceResult, iHitgroup) - 52usize];
 };
+impl Default for TraceResult {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct cvar_s {
@@ -582,6 +627,15 @@ const _: () = {
     ["Offset of field: cvar_s::value"][::std::mem::offset_of!(cvar_s, value) - 12usize];
     ["Offset of field: cvar_s::next"][::std::mem::offset_of!(cvar_s, next) - 16usize];
 };
+impl Default for cvar_s {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
 pub type cvar_t = cvar_s;
 pub const ALERT_TYPE_at_notice: ALERT_TYPE = 0;
 pub const ALERT_TYPE_at_console: ALERT_TYPE = 1;
@@ -621,6 +675,15 @@ const _: () = {
     ["Offset of field: sentenceEntry_::index"]
         [::std::mem::offset_of!(sentenceEntry_, index) - 12usize];
 };
+impl Default for sentenceEntry_ {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct client_textmessage_s {
@@ -681,6 +744,15 @@ const _: () = {
     ["Offset of field: client_textmessage_s::pMessage"]
         [::std::mem::offset_of!(client_textmessage_s, pMessage) - 40usize];
 };
+impl Default for client_textmessage_s {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
 pub type client_textmessage_t = client_textmessage_s;
 pub type sequenceCommandLine_s = sequenceCommandLine_;
 #[repr(C)]
@@ -731,6 +803,15 @@ const _: () = {
     ["Offset of field: sequenceCommandLine_::nextCommandLine"]
         [::std::mem::offset_of!(sequenceCommandLine_, nextCommandLine) - 88usize];
 };
+impl Default for sequenceCommandLine_ {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
 pub type sequenceEntry_s = sequenceEntry_;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -756,8 +837,17 @@ const _: () = {
     ["Offset of field: sequenceEntry_::isGlobal"]
         [::std::mem::offset_of!(sequenceEntry_, isGlobal) - 16usize];
 };
+impl Default for sequenceEntry_ {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct enginefuncs_s {
     pub pfnPrecacheModel: ::std::option::Option<
         unsafe extern "C" fn(s: *const ::std::os::raw::c_char) -> ::std::os::raw::c_int,
@@ -1760,9 +1850,18 @@ const _: () = {
     ["Offset of field: plugin_info_t::unloadable"]
         [::std::mem::offset_of!(plugin_info_t, unloadable) - 32usize];
 };
+impl Default for plugin_info_t {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
 pub type plid_t = *mut plugin_info_t;
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct hudtextparms_s {
     pub x: f32,
     pub y: f32,
@@ -1838,6 +1937,15 @@ const _: () = {
     ["Offset of field: KeyValueData_s::fHandled"]
         [::std::mem::offset_of!(KeyValueData_s, fHandled) - 12usize];
 };
+impl Default for KeyValueData_s {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
 pub type KeyValueData = KeyValueData_s;
 pub type SAVERESTOREDATA = saverestore_s;
 #[repr(C)]
@@ -1863,6 +1971,15 @@ const _: () = {
     ["Offset of field: ENTITYTABLE::classname"]
         [::std::mem::offset_of!(ENTITYTABLE, classname) - 20usize];
 };
+impl Default for ENTITYTABLE {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct LEVELLIST {
@@ -1883,6 +2000,15 @@ const _: () = {
     ["Offset of field: LEVELLIST::vecLandmarkOrigin"]
         [::std::mem::offset_of!(LEVELLIST, vecLandmarkOrigin) - 68usize];
 };
+impl Default for LEVELLIST {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct saverestore_s {
@@ -1942,6 +2068,15 @@ const _: () = {
     ["Offset of field: saverestore_s::szCurrentMapName"]
         [::std::mem::offset_of!(saverestore_s, szCurrentMapName) - 1364usize];
 };
+impl Default for saverestore_s {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
 pub const _fieldtypes_FIELD_FLOAT: _fieldtypes = 0;
 pub const _fieldtypes_FIELD_STRING: _fieldtypes = 1;
 pub const _fieldtypes_FIELD_ENTITY: _fieldtypes = 2;
@@ -1987,6 +2122,15 @@ const _: () = {
     ["Offset of field: TYPEDESCRIPTION::flags"]
         [::std::mem::offset_of!(TYPEDESCRIPTION, flags) - 14usize];
 };
+impl Default for TYPEDESCRIPTION {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
 pub const resourcetype_t_t_sound: resourcetype_t = 0;
 pub const resourcetype_t_t_skin: resourcetype_t = 1;
 pub const resourcetype_t_t_model: resourcetype_t = 2;
@@ -2029,6 +2173,15 @@ const _: () = {
     ["Offset of field: resource_s::pNext"][::std::mem::offset_of!(resource_s, pNext) - 128usize];
     ["Offset of field: resource_s::pPrev"][::std::mem::offset_of!(resource_s, pPrev) - 132usize];
 };
+impl Default for resource_s {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
 pub type resource_t = resource_s;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2063,9 +2216,18 @@ const _: () = {
     ["Offset of field: customization_s::pNext"]
         [::std::mem::offset_of!(customization_s, pNext) - 160usize];
 };
+impl Default for customization_s {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
 pub type customization_t = customization_s;
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct DLL_FUNCTIONS {
     pub pfnGameInit: ::std::option::Option<unsafe extern "C" fn()>,
     pub pfnSpawn:
@@ -2344,7 +2506,7 @@ const _: () = {
         [::std::mem::offset_of!(DLL_FUNCTIONS, pfnAllowLagCompensation) - 196usize];
 };
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct NEW_DLL_FUNCTIONS {
     pub pfnOnFreeEntPrivateData: ::std::option::Option<unsafe extern "C" fn(pEnt: *mut edict_t)>,
     pub pfnGameShutdown: ::std::option::Option<unsafe extern "C" fn()>,
@@ -2382,7 +2544,7 @@ const _: () = {
         [::std::mem::offset_of!(NEW_DLL_FUNCTIONS, pfnCvarValue2) - 16usize];
 };
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct meta_util_funcs_s {
     pub pfnLogConsole: ::std::option::Option<
         unsafe extern "C" fn(plid: plid_t, fmt: *const ::std::os::raw::c_char, ...),
@@ -2546,7 +2708,7 @@ pub type GET_ENGINE_FUNCTIONS_FN = ::std::option::Option<
     ) -> ::std::os::raw::c_int,
 >;
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct META_FUNCTIONS {
     pub pfnGetEntityAPI: GETENTITYAPI_FN,
     pub pfnGetEntityAPI_Post: GETENTITYAPI_FN,
@@ -2608,6 +2770,15 @@ const _: () = {
     ["Offset of field: meta_globals_s::override_ret"]
         [::std::mem::offset_of!(meta_globals_s, override_ret) - 16usize];
 };
+impl Default for meta_globals_s {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
 pub type meta_globals_t = meta_globals_s;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2624,6 +2795,15 @@ const _: () = {
     ["Offset of field: gamedll_funcs_t::newapi_table"]
         [::std::mem::offset_of!(gamedll_funcs_t, newapi_table) - 4usize];
 };
+impl Default for gamedll_funcs_t {
+    fn default() -> Self {
+        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct delta_s {

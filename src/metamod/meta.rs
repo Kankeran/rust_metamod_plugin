@@ -2,13 +2,14 @@ use super::abi;
 use cstr::cstr;
 use std::{
     ffi::{CStr, c_char},
+    ptr,
     sync::OnceLock,
 };
 
 static PRINT_FORMAT: &CStr = cstr!("%s");
 
 static PLUGIN_IFVERS: &CStr = cstr!("5:13");
-static PLUGIN_NAME: &CStr = cstr!("rust print");
+static PLUGIN_NAME: &CStr = cstr!("rust print");// check if c"rust print" works
 static PLUGIN_VERSION: &CStr = cstr!("1.0.0");
 static PLUGIN_DATE: &CStr = cstr!("26.12.2025");
 static PLUGIN_AUTHOR: &CStr = cstr!("AwIlL");
@@ -29,6 +30,20 @@ pub static mut PLUGIN_INFO: abi::plugin_info_t = abi::plugin_info_t {
 
 pub fn c_char_to_string(ptr: *const c_char) -> String {
     unsafe { CStr::from_ptr(ptr).to_string_lossy().into_owned() }
+}
+
+pub fn origin_from_ptr(origin: *const f32) -> Option<[f32; 3]> {
+    if origin.is_null() {
+        None
+    } else {
+        // SAFETY:
+        // - pointer isn't null
+        // - engine contract says it is exactly 3 f32
+        unsafe {
+            let slice = std::slice::from_raw_parts(origin, 3);
+            Some([slice[0], slice[1], slice[2]])
+        }
+    }
 }
 
 pub static mut GAME_DLL_FUNCS: *const abi::gamedll_funcs_t = std::ptr::null();
@@ -72,10 +87,7 @@ pub fn console_log(msg: &CStr) {
     }
 }
 
-pub fn get_user_msg_id(
-    msg_name: &CStr,
-    size: *mut ::std::os::raw::c_int,
-) -> Option<::std::os::raw::c_int> {
+pub fn get_user_msg_id(msg_name: &CStr, size: *mut i32) -> Option<i32> {
     if let Some(api) = META_UTIL_FUNCS.get() {
         if let Some(function) = api.pfnGetUserMsgID {
             let result = unsafe { function(&raw mut PLUGIN_INFO, msg_name.as_ptr(), size) };
@@ -118,91 +130,6 @@ pub fn alert(msg: &CStr) {
                     msg.as_ptr(),
                 )
             }
-        }
-    }
-}
-
-pub fn message_begin(
-    msg_dest: ::std::os::raw::c_int,
-    msg_type: ::std::os::raw::c_int,
-    origin: *const f32,
-    ed: *mut abi::edict_t,
-) {
-    if let Some(api) = ENG_FUNCS.get() {
-        if let Some(function) = api.pfnMessageBegin {
-            unsafe { function(msg_dest, msg_type, origin, ed) }
-        }
-    }
-}
-
-pub fn message_end() {
-    if let Some(api) = ENG_FUNCS.get() {
-        if let Some(function) = api.pfnMessageEnd {
-            unsafe { function() }
-        }
-    }
-}
-
-pub fn write_byte(value: ::std::os::raw::c_int) {
-    if let Some(api) = ENG_FUNCS.get() {
-        if let Some(function) = api.pfnWriteByte {
-            unsafe { function(value) }
-        }
-    }
-}
-
-pub fn write_char(value: ::std::os::raw::c_int) {
-    if let Some(api) = ENG_FUNCS.get() {
-        if let Some(function) = api.pfnWriteChar {
-            unsafe { function(value) }
-        }
-    }
-}
-
-pub fn write_short(value: ::std::os::raw::c_int) {
-    if let Some(api) = ENG_FUNCS.get() {
-        if let Some(function) = api.pfnWriteShort {
-            unsafe { function(value) }
-        }
-    }
-}
-
-pub fn write_long(value: ::std::os::raw::c_int) {
-    if let Some(api) = ENG_FUNCS.get() {
-        if let Some(function) = api.pfnWriteLong {
-            unsafe { function(value) }
-        }
-    }
-}
-
-pub fn write_angle(value: f32) {
-    if let Some(api) = ENG_FUNCS.get() {
-        if let Some(function) = api.pfnWriteAngle {
-            unsafe { function(value) }
-        }
-    }
-}
-
-pub fn write_coord(value: f32) {
-    if let Some(api) = ENG_FUNCS.get() {
-        if let Some(function) = api.pfnWriteCoord {
-            unsafe { function(value) }
-        }
-    }
-}
-
-pub fn write_string(value: &CStr) {
-    if let Some(api) = ENG_FUNCS.get() {
-        if let Some(function) = api.pfnWriteString {
-            unsafe { function(value.as_ptr()) }
-        }
-    }
-}
-
-pub fn write_entity(value: ::std::os::raw::c_int) {
-    if let Some(api) = ENG_FUNCS.get() {
-        if let Some(function) = api.pfnWriteEntity {
-            unsafe { function(value) }
         }
     }
 }

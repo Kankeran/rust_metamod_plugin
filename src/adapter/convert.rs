@@ -7,9 +7,9 @@ pub fn result(result: &api::Return) -> i32 {
     match result {
         api::Return::Ignored => meta_const::RESULT_IGNORED,
         api::Return::Handled => meta_const::RESULT_HANDLED,
-        api::Return::HandledMain => meta_const::RESULT_SUPERCEDE,
         api::Return::Override => meta_const::RESULT_OVERRIDE,
         api::Return::Supercede => meta_const::RESULT_SUPERCEDE,
+        api::Return::DeferSupercede => meta_const::RESULT_SUPERCEDE,
     }
 }
 
@@ -19,6 +19,16 @@ pub fn print_mode(mode: &api::PrintMode) -> i32 {
         api::PrintMode::PrintConsole => meta_const::PRINT_CONSOLE,
         api::PrintMode::PrintChat => meta_const::PRINT_CHAT,
         api::PrintMode::PrintCenter => meta_const::PRINT_CENTER,
+    }
+}
+
+pub fn to_print_mode(mode: i32) -> api::PrintMode {
+	match mode {
+        meta_const::PRINT_NOTIFY => api::PrintMode::PrintNotify,
+        meta_const::PRINT_CONSOLE => api::PrintMode::PrintConsole,
+        meta_const::PRINT_CHAT => api::PrintMode::PrintChat,
+        meta_const::PRINT_CENTER => api::PrintMode::PrintCenter,
+		_ => api::PrintMode::PrintChat,
     }
 }
 

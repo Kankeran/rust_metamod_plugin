@@ -1,5 +1,5 @@
 use crate::{
-    adapter::{entry, messages_handler, player},
+    adapter::{entry, messages_handler},
     metamod::meta_api,
     plugin,
 };
@@ -32,9 +32,4 @@ pub fn load() {
     );
 
     plugin::load();
-
-    let p = player::get_player(13);
-    if let Some(p) = p {
-        p.connected = true;
-    }
 }

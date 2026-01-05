@@ -1,8 +1,6 @@
-use std::{ffi::CString, ptr};
-
 use crate::{
     adapter::{api, convert},
-    metamod::{meta, meta_api, meta_const},
+    metamod::{meta_api, meta_const},
 };
 
 pub struct TextMessage {
@@ -20,22 +18,16 @@ impl TextMessage {
         if let Some(msg_id) = meta_api::get_text_msg_id() {
             let point = self.msg.floor_char_boundary(188);
             let (msg, _) = self.msg.split_at(point);
-            if let Ok(cmsg) = CString::new(msg) {
-                if let Some(id) = self.id {
-                    let entity = meta::get_ent_by_index(id).unwrap();
-                    meta::message_begin(meta_const::MSG_ONE as i32, msg_id, ptr::null(), entity);
-                } else {
-                    meta::message_begin(
-                        meta_const::MSG_BROADCAST as i32,
-                        msg_id,
-                        ptr::null(),
-                        ptr::null_mut(),
-                    );
-                }
-                meta::write_byte(convert::print_mode(&self.mode));
-                meta::write_string(cmsg.as_c_str());
-                meta::message_end();
-            }
+            let entity = meta_api::get_ent_by_index(self.id);
+            let msg_dest = if let None = entity {
+                meta_const::MSG_BROADCAST
+            } else {
+                meta_const::MSG_ONE
+            };
+            meta_api::message_begin(msg_dest, msg_id, None, entity.as_ref());
+            meta_api::write_byte(convert::print_mode(&self.mode));
+            meta_api::write_string(msg);
+            meta_api::message_end();
         }
     }
 }

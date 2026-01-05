@@ -1,12 +1,12 @@
 use std::sync::OnceLock;
 
-use crate::metamod::{abi, meta, meta_const};
+use crate::metamod::{abi, meta, meta_api, meta_const};
 
 pub struct EntryFuncs {
     init: fn(),
     setup: fn(),
     client_command: fn(i32, Vec<String>) -> i32,
-    message_begin: fn(i32, i32, *const f32, *mut abi::edict_t) -> i32,
+    message_begin: fn(i32, i32, Option<[f32; 3]>, Option<meta_api::EdictPtr>) -> i32,
     write_byte: fn(i32) -> i32,
     write_char: fn(i32) -> i32,
     write_short: fn(i32) -> i32,
@@ -16,7 +16,7 @@ pub struct EntryFuncs {
     write_string: fn(String) -> i32,
     write_entity: fn(i32) -> i32,
     message_end: fn() -> i32,
-    message_begin_post: fn(i32, i32, *const f32, *mut abi::edict_t) -> i32,
+    message_begin_post: fn(i32, i32, Option<[f32; 3]>, Option<meta_api::EdictPtr>) -> i32,
     write_byte_post: fn(i32) -> i32,
     write_char_post: fn(i32) -> i32,
     write_short_post: fn(i32) -> i32,
@@ -33,7 +33,7 @@ impl EntryFuncs {
         init: fn(),
         setup: fn(),
         client_command: fn(i32, Vec<String>) -> i32,
-        message_begin: fn(i32, i32, *const f32, *mut abi::edict_t) -> i32,
+        message_begin: fn(i32, i32, Option<[f32; 3]>, Option<meta_api::EdictPtr>) -> i32,
         write_byte: fn(i32) -> i32,
         write_char: fn(i32) -> i32,
         write_short: fn(i32) -> i32,
@@ -43,7 +43,7 @@ impl EntryFuncs {
         write_string: fn(String) -> i32,
         write_entity: fn(i32) -> i32,
         message_end: fn() -> i32,
-        message_begin_post: fn(i32, i32, *const f32, *mut abi::edict_t) -> i32,
+        message_begin_post: fn(i32, i32, Option<[f32; 3]>, Option<meta_api::EdictPtr>) -> i32,
         write_byte_post: fn(i32) -> i32,
         write_char_post: fn(i32) -> i32,
         write_short_post: fn(i32) -> i32,
@@ -108,10 +108,16 @@ pub fn message_begin(
     msg_dest: i32,
     msg_type: i32,
     origin: *const f32,
-    ed: *mut abi::edict_t,
+    ent: *mut abi::edict_t,
 ) -> i32 {
     if let Some(entry_funcs) = ENTRY_FUNCS.get() {
-        return (entry_funcs.message_begin)(msg_dest, msg_type, origin, ed);
+        let origin = meta::origin_from_ptr(origin);
+        let ent = if !ent.is_null() {
+            Some(meta_api::EdictPtr::new(ent))
+        } else {
+            None
+        };
+        return (entry_funcs.message_begin)(msg_dest, msg_type, origin, ent);
     }
 
     meta_const::RESULT_IGNORED
@@ -166,8 +172,8 @@ pub fn write_coord(value: f32) -> i32 {
 }
 
 pub fn write_string(value: *const ::std::os::raw::c_char) -> i32 {
-    let value = meta::c_char_to_string(value);
     if let Some(entry_funcs) = ENTRY_FUNCS.get() {
+        let value = meta::c_char_to_string(value);
         return (entry_funcs.write_string)(value);
     }
 
@@ -194,10 +200,16 @@ pub fn message_begin_post(
     msg_dest: i32,
     msg_type: i32,
     origin: *const f32,
-    ed: *mut abi::edict_t,
+    ent: *mut abi::edict_t,
 ) -> i32 {
     if let Some(entry_funcs) = ENTRY_FUNCS.get() {
-        return (entry_funcs.message_begin_post)(msg_dest, msg_type, origin, ed);
+        let origin = meta::origin_from_ptr(origin);
+        let ent = if !ent.is_null() {
+            Some(meta_api::EdictPtr::new(ent))
+        } else {
+            None
+        };
+        return (entry_funcs.message_begin_post)(msg_dest, msg_type, origin, ent);
     }
 
     meta_const::RESULT_IGNORED
@@ -252,8 +264,8 @@ pub fn write_coord_post(value: f32) -> i32 {
 }
 
 pub fn write_string_post(value: *const ::std::os::raw::c_char) -> i32 {
-    let value = meta::c_char_to_string(value);
     if let Some(entry_funcs) = ENTRY_FUNCS.get() {
+        let value = meta::c_char_to_string(value);
         return (entry_funcs.write_string_post)(value);
     }
 

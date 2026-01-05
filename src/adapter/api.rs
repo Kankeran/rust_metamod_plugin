@@ -2,15 +2,24 @@ use std::ffi::CString;
 
 use crate::{
     adapter::{command, entry, messages::TextMessage},
-    metamod::{meta},
+    metamod::{meta, meta_api},
 };
+
+pub use meta_api::EdictPtr;
 
 pub enum Return {
     Ignored,
     Handled,
-    HandledMain,
     Override,
     Supercede,
+	DeferSupercede,
+}
+
+#[derive(Clone, Copy)]
+pub enum BlockMode {
+	BlockNone,
+	BlockOne,
+	BlockAll,
 }
 
 pub enum PrintMode {

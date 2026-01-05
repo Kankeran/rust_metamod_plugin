@@ -1,10 +1,27 @@
-use crate::metamod::{abi, entry, msgs};
+use std::{ffi::{CStr, CString}, ptr};
+
+use crate::metamod::{abi, entry, meta, msgs};
+
+pub struct EdictPtr(*mut abi::edict_t);
+
+unsafe impl Sync for EdictPtr {}
+unsafe impl Send for EdictPtr {}
+
+impl EdictPtr {
+    pub fn new(ent: *mut abi::edict_t) -> EdictPtr {
+        EdictPtr(ent)
+    }
+
+    pub fn as_ptr(&self) -> *mut abi::edict_t {
+        self.0
+    }
+}
 
 pub fn setup_entry(
     init: fn(),
     setup: fn(),
     client_command: fn(i32, Vec<String>) -> i32,
-    message_begin: fn(i32, i32, *const f32, *mut abi::edict_t) -> i32,
+    message_begin: fn(i32, i32, Option<[f32; 3]>, Option<EdictPtr>) -> i32,
     write_byte: fn(i32) -> i32,
     write_char: fn(i32) -> i32,
     write_short: fn(i32) -> i32,
@@ -14,7 +31,7 @@ pub fn setup_entry(
     write_string: fn(String) -> i32,
     write_entity: fn(i32) -> i32,
     message_end: fn() -> i32,
-    message_begin_post: fn(i32, i32, *const f32, *mut abi::edict_t) -> i32,
+    message_begin_post: fn(i32, i32, Option<[f32; 3]>, Option<EdictPtr>) -> i32,
     write_byte_post: fn(i32) -> i32,
     write_char_post: fn(i32) -> i32,
     write_short_post: fn(i32) -> i32,
@@ -50,6 +67,28 @@ pub fn setup_entry(
         write_entity_post,
         message_end_post,
     ));
+}
+
+pub fn get_ent_index(entity: Option<&EdictPtr>) -> Option<i32> {
+    if let Some(ent) = entity {
+        meta::get_ent_index(ent.as_ptr())
+    } else {
+        None
+    }
+}
+
+pub fn get_ent_by_index(index: Option<i32>) -> Option<EdictPtr> {
+    if let Some(index) = index {
+        if let Some(ent) = meta::get_ent_by_index(index)
+            && !ent.is_null()
+        {
+            Some(EdictPtr::new(ent))
+        } else {
+            None
+        }
+    } else {
+        None
+    }
 }
 
 pub fn get_text_msg_id() -> Option<i32> {
@@ -138,4 +177,99 @@ pub fn get_say_text_id() -> Option<i32> {
 
 pub fn get_init_hud_id() -> Option<i32> {
     unsafe { msgs::INIT_HUD }
+}
+
+pub fn message_begin(
+    msg_dest: i32,
+    msg_type: i32,
+    origin: Option<[f32; 3]>,
+    entity: Option<&EdictPtr>,
+) {
+    if let Some(api) = meta::ENG_FUNCS.get() {
+        if let Some(function) = api.pfnMessageBegin {
+            let origin = if let Some(origin) = origin {
+                origin.as_ptr()
+            } else {
+                ptr::null()
+            };
+            let entity = if let Some(entity) = entity {
+                entity.as_ptr()
+            } else {
+                ptr::null_mut()
+            };
+            unsafe { function(msg_dest, msg_type, origin, entity) }
+        }
+    }
+}
+
+pub fn message_end() {
+    if let Some(api) = meta::ENG_FUNCS.get() {
+        if let Some(function) = api.pfnMessageEnd {
+            unsafe { function() }
+        }
+    }
+}
+
+pub fn write_byte(value: i32) {
+    if let Some(api) = meta::ENG_FUNCS.get() {
+        if let Some(function) = api.pfnWriteByte {
+            unsafe { function(value) }
+        }
+    }
+}
+
+pub fn write_char(value: i32) {
+    if let Some(api) = meta::ENG_FUNCS.get() {
+        if let Some(function) = api.pfnWriteChar {
+            unsafe { function(value) }
+        }
+    }
+}
+
+pub fn write_short(value: i32) {
+    if let Some(api) = meta::ENG_FUNCS.get() {
+        if let Some(function) = api.pfnWriteShort {
+            unsafe { function(value) }
+        }
+    }
+}
+
+pub fn write_long(value: i32) {
+    if let Some(api) = meta::ENG_FUNCS.get() {
+        if let Some(function) = api.pfnWriteLong {
+            unsafe { function(value) }
+        }
+    }
+}
+
+pub fn write_angle(value: f32) {
+    if let Some(api) = meta::ENG_FUNCS.get() {
+        if let Some(function) = api.pfnWriteAngle {
+            unsafe { function(value) }
+        }
+    }
+}
+
+pub fn write_coord(value: f32) {
+    if let Some(api) = meta::ENG_FUNCS.get() {
+        if let Some(function) = api.pfnWriteCoord {
+            unsafe { function(value) }
+        }
+    }
+}
+
+pub fn write_string(value: &str) {
+    if let Some(api) = meta::ENG_FUNCS.get() {
+        if let Some(function) = api.pfnWriteString {
+            unsafe { function(CString::new(value).unwrap().as_ptr()) }
+        }
+    }
+}
+
+pub fn write_entity(value: i32) {
+    if let Some(api) = meta::ENG_FUNCS.get() {
+        if let Some(function) = api.pfnWriteEntity {
+            unsafe { function(value) }
+        }
+    }
 }
