@@ -1,5 +1,4 @@
 use super::abi;
-use cstr::cstr;
 use std::{
     ffi::{CStr, c_char},
     sync::OnceLock,

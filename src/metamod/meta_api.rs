@@ -1,7 +1,4 @@
-use std::{
-    ffi::{CStr, CString},
-    ptr,
-};
+use std::{ffi::CString, ptr};
 
 use crate::metamod::{abi, entry, meta, msgs};
 

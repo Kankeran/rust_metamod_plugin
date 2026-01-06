@@ -1,7 +1,7 @@
 use std::ffi::CString;
 
 use crate::{
-    adapter::{command, entry, messages::{HudMessage, ShowMenuMessage, TextMessage}},
+    adapter::{command, entry, messages::{DHudMessage, HudMessage, ShowMenuMessage, TextMessage}},
     metamod::{meta, meta_api}, util::log,
 };
 
@@ -82,8 +82,12 @@ pub fn show_menu(id: i32, keys: i32, time: i32, buf: String) {
     ShowMenuMessage::new(id, keys, time, buf).send();
 }
 
-pub fn shouw_hud_message(id: Option<i32>, style: HudStyle, channel: HudChannel, message: String) {
+pub fn show_hud_message(id: Option<i32>, style: HudStyle, channel: HudChannel, message: String) {
     HudMessage::new(id, style, channel, message).send();
+}
+
+pub fn show_dhud_message(id: Option<i32>, style: HudStyle, message: String) {
+    DHudMessage::new(id, style, message).send();
 }
 
 pub fn console_log(msg: &str) {

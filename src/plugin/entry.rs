@@ -18,6 +18,7 @@ pub fn plugin_init() {
     // api::handle_msg(api::UserMsgs::Damage);
     api::register_client_command(String::from("say"), Some(String::from("/menu")), on_menu);
     api::register_client_command(String::from("say"), Some(String::from("/hud")), on_hud);
+    api::register_client_command(String::from("say"), Some(String::from("/dhud")), on_dhud);
 }
 
 pub fn plugin_precache() {}
@@ -76,18 +77,34 @@ fn on_hud(id: i32, _arguments: &Vec<String>) -> api::Return {
             b: 0,
             a: 0,
         },
-        color2: api::Color {
-            r: 255,
-            g: 255,
-            b: 250,
-            a: 0,
-        },
+        color2: api::Color::default_color2(),
         fade_in_time: 0.0,
         fade_out_time: 0.0,
         hold_time: 1.0,
         fx_time: 0.0,
     };
-    api::shouw_hud_message(Some(id), style, api::HudChannel::One, format!("piekny hud :)"));
+    api::show_hud_message(Some(id), style, api::HudChannel::One, format!("piekny hud :)"));
+
+    api::Return::Ignored
+}
+
+fn on_dhud(id: i32, _arguments: &Vec<String>) -> api::Return {
+    let style = api::HudStyle {
+        point: api::Point { x: 0.2, y: 0.23 },
+        effect: 0,
+        color1: api::Color {
+            r: 100,
+            g: 150,
+            b: 0,
+            a: 0,
+        },
+        color2: api::Color::default_color2(),
+        fade_in_time: 0.0,
+        fade_out_time: 0.0,
+        hold_time: 4.0,
+        fx_time: 0.0,
+    };
+    api::show_dhud_message(Some(id), style, format!("piekny dhud :)"));
 
     api::Return::Ignored
 }

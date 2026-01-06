@@ -87,3 +87,21 @@ pub const SVC_SENDCVARVALUE: i32 = 57;
 pub const SVC_SENDCVARVALUE2: i32 = 58;
 
 pub const TE_TEXTMESSAGE: i32 = 29;
+
+/**
+ * From hltv.h from the HLSDK, these are used in conjunction with SVC_DIRECTOR
+ * sub commands of svc_director
+ */
+pub const DRC_CMD_NONE: i32 = 0; // NULL director command
+pub const DRC_CMD_START: i32 = 1; // start director mode
+pub const DRC_CMD_EVENT: i32 = 2; // informs about director command
+pub const DRC_CMD_MODE: i32 = 3; // switches camera modes
+pub const DRC_CMD_CAMERA: i32 = 4; // sets camera registers
+pub const DRC_CMD_TIMESCALE: i32 = 5; // sets time scale
+pub const DRC_CMD_MESSAGE: i32 = 6; // send HUD centerprint
+pub const DRC_CMD_SOUND: i32 = 7; // plays a particular sound
+pub const DRC_CMD_STATUS: i32 = 8; // status info about broadcast
+pub const DRC_CMD_BANNER: i32 = 9; // banner file name for HLTV gui
+pub const DRC_CMD_FADE: i32 = 10; // send screen fade command
+pub const DRC_CMD_SHAKE: i32 = 11; // send screen shake command
+pub const DRC_CMD_STUFFTEXT: i32 = 12; // like the normal svc_stufftext but as director command
