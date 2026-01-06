@@ -1,12 +1,16 @@
 use std::ffi::CString;
 
 use crate::{
-    adapter::{command, entry, messages::{ShowMenuMessage, TextMessage}},
-    metamod::{meta, meta_api},
+    adapter::{command, entry, messages::{HudMessage, ShowMenuMessage, TextMessage}},
+    metamod::{meta, meta_api}, util::log,
 };
 
 pub use meta_api::EdictPtr;
 pub use crate::adapter::messages_handler::handle_msg;
+pub use crate::adapter::messages::HudChannel;
+pub use crate::adapter::messages::Point;
+pub use crate::adapter::messages::Color;
+pub use crate::adapter::messages::HudStyle;
 
 pub enum Return {
     Ignored,
@@ -54,6 +58,7 @@ pub enum UserMsgs {
     RoundTime,
     SayText,
     InitHud,
+    SvcTempEntity,
 }
 
 pub fn setup_entry(init: fn(), precache: fn()) -> Result<(), fn()> {
@@ -75,6 +80,10 @@ pub fn client_print(id: Option<i32>, mode: PrintMode, msg: &str) {
 
 pub fn show_menu(id: i32, keys: i32, time: i32, buf: String) {
     ShowMenuMessage::new(id, keys, time, buf).send();
+}
+
+pub fn shouw_hud_message(id: Option<i32>, style: HudStyle, channel: HudChannel, message: String) {
+    HudMessage::new(id, style, channel, message).send();
 }
 
 pub fn console_log(msg: &str) {

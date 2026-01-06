@@ -56,6 +56,7 @@ pub fn user_msg_id(msg: &api::UserMsgs) -> Option<i32> {
         api::UserMsgs::RoundTime => meta_api::get_round_time_id(),
         api::UserMsgs::SayText => meta_api::get_say_text_id(),
         api::UserMsgs::InitHud => meta_api::get_init_hud_id(),
+        api::UserMsgs::SvcTempEntity => Some(meta_const::SVC_TEMPENTITY),
     }
 }
 
@@ -148,6 +149,8 @@ pub fn user_msg(msg_id: i32) -> Option<api::UserMsgs> {
         && msg_id == id
     {
         Some(api::UserMsgs::InitHud)
+    } else if msg_id == meta_const::SVC_TEMPENTITY {
+        Some(api::UserMsgs::SvcTempEntity)
     } else {
         None
     }

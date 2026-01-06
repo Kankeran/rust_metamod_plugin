@@ -1,3 +1,5 @@
 [alias]
 build-linux = "build --target i686-unknown-linux-gnu"
 build-win   = "build --target i686-pc-windows-msvc"
+test-linux  = "test --target i686-unknown-linux-gnu"
+test-win    = "test --target i686-pc-windows-msvc"
