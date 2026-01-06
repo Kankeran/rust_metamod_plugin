@@ -11,14 +11,14 @@ use crate::{
 
 static MSG: Mutex<Option<RawMessage>> = Mutex::new(None);
 static mut MSG_BLOCKS: [BlockMode; 256] = [BlockMode::BlockNone; 256];
-// TODO: change login when registration messages will be possible, bool for now
+// TODO: change logic when registration messages will be possible, bool for now
 static mut MSG_HOOKS: [bool; 256] = [false; 256];
 
 static mut MSG_TYPE_CURRENT: i32 = 0;
 static mut HOOK_CURRENT: bool = false;
 static mut BLOCK_CURRENT: bool = false;
 
-pub fn handle_msg(msg_type: api::UserMsgs) {
+pub fn handle_msg(msg_type: api::UserMsgs) { // TODO: remove after tests
     if let Some(msg_type) = convert::user_msg_id(&msg_type) {
 
         unsafe {MSG_HOOKS[msg_type as usize] = true}
@@ -276,61 +276,61 @@ pub fn message_begin_post(
     origin: Option<[f32; 3]>,
     ent: Option<meta_api::EdictPtr>,
 ) -> i32 {
-    // api::console_debug("message_begin_post");
+    api::console_debug("message_begin_post");
 
     meta_const::RESULT_IGNORED
 }
 
 pub fn write_byte_post(value: i32) -> i32 {
-    // api::console_debug("write_byte_post");
+    api::console_debug("write_byte_post");
 
     meta_const::RESULT_IGNORED
 }
 
 pub fn write_char_post(value: i32) -> i32 {
-    // api::console_debug("write_char_post");
+    api::console_debug("write_char_post");
 
     meta_const::RESULT_IGNORED
 }
 
 pub fn write_short_post(value: i32) -> i32 {
-    // api::console_debug("write_short_post");
+    api::console_debug("write_short_post");
 
     meta_const::RESULT_IGNORED
 }
 
 pub fn write_long_post(value: i32) -> i32 {
-    // api::console_debug("write_long_post");
+    api::console_debug("write_long_post");
 
     meta_const::RESULT_IGNORED
 }
 
 pub fn write_angle_post(value: f32) -> i32 {
-    // api::console_debug("write_angle_post");
+    api::console_debug("write_angle_post");
 
     meta_const::RESULT_IGNORED
 }
 
 pub fn write_coord_post(value: f32) -> i32 {
-    // api::console_debug("write_coord_post");
+    api::console_debug("write_coord_post");
 
     meta_const::RESULT_IGNORED
 }
 
 pub fn write_string_post(value: String) -> i32 {
-    // api::console_debug("write_string_post");
+    api::console_debug("write_string_post");
 
     meta_const::RESULT_IGNORED
 }
 
 pub fn write_entity_post(value: i32) -> i32 {
-    // api::console_debug("write_entity_post");
+    api::console_debug("write_entity_post");
 
     meta_const::RESULT_IGNORED
 }
 
 pub fn message_end_post() -> i32 {
-    // api::console_debug("message_end_post");
+    api::console_debug("message_end_post");
 
     meta_const::RESULT_IGNORED
 }

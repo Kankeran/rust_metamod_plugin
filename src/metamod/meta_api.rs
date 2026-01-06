@@ -1,4 +1,7 @@
-use std::{ffi::{CStr, CString}, ptr};
+use std::{
+    ffi::{CStr, CString},
+    ptr,
+};
 
 use crate::metamod::{abi, entry, meta, msgs};
 
@@ -78,7 +81,7 @@ pub fn get_ent_index(entity: Option<&EdictPtr>) -> Option<i32> {
     }
 }
 
-pub fn get_ent_by_index(index: Option<i32>) -> Option<EdictPtr> {
+pub fn get_ent_by_index_option(index: Option<i32>) -> Option<EdictPtr> {
     if let Some(index) = index {
         if let Some(ent) = meta::get_ent_by_index(index)
             && !ent.is_null()
@@ -87,6 +90,16 @@ pub fn get_ent_by_index(index: Option<i32>) -> Option<EdictPtr> {
         } else {
             None
         }
+    } else {
+        None
+    }
+}
+
+pub fn get_ent_by_index(index: i32) -> Option<EdictPtr> {
+    if let Some(ent) = meta::get_ent_by_index(index)
+        && !ent.is_null()
+    {
+        Some(EdictPtr::new(ent))
     } else {
         None
     }

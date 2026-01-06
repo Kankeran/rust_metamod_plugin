@@ -1,7 +1,7 @@
 use std::ffi::CString;
 
 use crate::{
-    adapter::{command, entry, messages::TextMessage},
+    adapter::{command, entry, messages::{ShowMenuMessage, TextMessage}},
     metamod::{meta, meta_api},
 };
 
@@ -71,6 +71,10 @@ pub fn register_client_command(
 
 pub fn client_print(id: Option<i32>, mode: PrintMode, msg: &str) {
     TextMessage::new(id, mode, msg.to_owned()).send();
+}
+
+pub fn show_menu(id: i32, keys: i32, time: i32, buf: String) {
+    ShowMenuMessage::new(id, keys, time, buf).send();
 }
 
 pub fn console_log(msg: &str) {

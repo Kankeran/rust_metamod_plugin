@@ -1,4 +1,4 @@
-use crate::adapter::api;
+use crate::{adapter::api, util::log};
 
 pub fn plugin_init() {
     api::console_debug("jest init");
@@ -13,7 +13,8 @@ pub fn plugin_init() {
         on_class_command,
     );
     api::register_client_command(String::from("rust_test"), None, on_rust_test);
-    api::handle_msg(api::UserMsgs::Damage);
+    // api::handle_msg(api::UserMsgs::Damage);
+    api::register_client_command(String::from("say"), Some(String::from("/menu")), on_menu);
 }
 
 pub fn plugin_precache() {}
@@ -37,6 +38,12 @@ fn on_class_command(_id: i32, _arguments: &Vec<String>) -> api::Return {
 
 fn on_rust_test(id: i32, _arguments: &Vec<String>) -> api::Return {
     api::client_print(Some(id), api::PrintMode::PrintChat, "rust test");
+
+    api::Return::Ignored
+}
+
+fn on_menu(id: i32, _arguments: &Vec<String>) -> api::Return {
+    api::show_menu(id, 1023, 10, format!("Elo\\r3\\y2\\w0\ngskhegskeghskjdghsd\nfrkshfekfsuehfksuehfukshefs\n\\r5.\\w hahahahah\nsdkjghserhgrshgsrhgrhgkldhrgkljhdsrgkhdrkglshdrkslghskldrhgkdsjhrkg\nkjehfjsekgfjesgfjksegfjhsgefjsgejfgsejfgskjefgjshdgfjshbfejhbsef\nkjehkslfhejhfgsejhgfsjegfjsegfjskdgfjds"));
 
     api::Return::Ignored
 }

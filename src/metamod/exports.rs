@@ -71,6 +71,11 @@ pub extern "C" fn meta_attach(
         return 0;
     }
 
+    if now > unsafe{meta::PLUGIN_INFO.loadable} {
+        log::error("Can't load	plugin right now");
+        return 0;
+    }
+
     unsafe {
         meta::META_GLOBALS = meta_globals;
         *function_table = META_FUNCTION_TABLE;

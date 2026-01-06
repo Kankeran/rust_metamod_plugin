@@ -2,19 +2,18 @@ use super::abi;
 use cstr::cstr;
 use std::{
     ffi::{CStr, c_char},
-    ptr,
     sync::OnceLock,
 };
 
-static PRINT_FORMAT: &CStr = cstr!("%s");
+static PRINT_FORMAT: &CStr = c"%s";
 
-static PLUGIN_IFVERS: &CStr = cstr!("5:13");
-static PLUGIN_NAME: &CStr = cstr!("rust print");// check if c"rust print" works
-static PLUGIN_VERSION: &CStr = cstr!("1.0.0");
-static PLUGIN_DATE: &CStr = cstr!("26.12.2025");
-static PLUGIN_AUTHOR: &CStr = cstr!("AwIlL");
-static PLUGIN_URL: &CStr = cstr!("-");
-static PLUGIN_LOGTAG: &CStr = cstr!("RUST_PRINT");
+static PLUGIN_IFVERS: &CStr = c"5:13";
+static PLUGIN_NAME: &CStr = c"rust print"; // check if c"rust print" works
+static PLUGIN_VERSION: &CStr = c"1.0.0";
+static PLUGIN_DATE: &CStr = c"26.12.2025";
+static PLUGIN_AUTHOR: &CStr = c"AwIlL";
+static PLUGIN_URL: &CStr = c"-";
+static PLUGIN_LOGTAG: &CStr = c"RUST_PRINT";
 
 pub static mut PLUGIN_INFO: abi::plugin_info_t = abi::plugin_info_t {
     ifvers: PLUGIN_IFVERS.as_ptr(),
@@ -24,8 +23,8 @@ pub static mut PLUGIN_INFO: abi::plugin_info_t = abi::plugin_info_t {
     author: PLUGIN_AUTHOR.as_ptr(),
     url: PLUGIN_URL.as_ptr(),
     logtag: PLUGIN_LOGTAG.as_ptr(),
-    loadable: abi::PLUG_LOADTIME_PT_ANYTIME,
-    unloadable: abi::PLUG_LOADTIME_PT_ANYPAUSE,
+    loadable: abi::PLUG_LOADTIME_PT_ANYTIME, // only for development, in future should be changed to PLUG_LOADTIME_PT_STARTUP
+    unloadable: abi::PLUG_LOADTIME_PT_ANYTIME,
 };
 
 pub fn c_char_to_string(ptr: *const c_char) -> String {
