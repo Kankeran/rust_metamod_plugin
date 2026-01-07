@@ -1,6 +1,5 @@
 use std::{ffi::CString, ptr};
-
-use crate::metamod::{abi, entry, meta, msgs};
+use super::{abi, entry, meta, msgs};
 
 #[derive(Debug)]
 pub struct EdictPtr(*mut abi::edict_t);

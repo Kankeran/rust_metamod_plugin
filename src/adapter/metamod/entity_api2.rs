@@ -1,23 +1,17 @@
 //! [abi::META_FUNCTIONS::pfnGetEntityAPI2] and [abi::META_FUNCTIONS::pfnGetEntityAPI2_Post] implementations
 
+use super::{abi, adapter, entry, meta, meta_const, msgs};
+use crate::util::log;
+use cstr::cstr;
 use std::{cmp::max, ptr::null_mut, sync::LazyLock};
 
-use cstr::cstr;
-
-use crate::{
-    metamod::{abi, adapter, entry, meta, meta_const},
-    util::log,
-};
-
-use super::msgs;
-
-static FUNCTION_TABLE: LazyLock<abi::DLL_FUNCTIONS> = LazyLock::new(|| { abi::DLL_FUNCTIONS {
+static FUNCTION_TABLE: LazyLock<abi::DLL_FUNCTIONS> = LazyLock::new(|| abi::DLL_FUNCTIONS {
     pfnSpawn: Some(spawn),
     pfnClientConnect: Some(client_connect),
     pfnClientCommand: Some(client_command),
     pfnServerActivate: Some(server_activate),
     ..Default::default()
-}});
+});
 
 pub extern "C" fn get_api(
     function_table: *mut abi::DLL_FUNCTIONS,
@@ -93,77 +87,56 @@ extern "C" fn server_activate(
 ) {
     if let None = unsafe { msgs::TEXT_MSG } {
         unsafe { msgs::TEXT_MSG = meta::get_user_msg_id(cstr!("TextMsg"), null_mut()) };
-    }
-    else if let None = unsafe { msgs::BAR_TIME } {
+    } else if let None = unsafe { msgs::BAR_TIME } {
         unsafe { msgs::BAR_TIME = meta::get_user_msg_id(cstr!("BarTime"), null_mut()) };
-    }
-    else if let None = unsafe { msgs::CUR_WEAPON } {
+    } else if let None = unsafe { msgs::CUR_WEAPON } {
         unsafe { msgs::CUR_WEAPON = meta::get_user_msg_id(cstr!("CurWeapon"), null_mut()) };
-    }
-    else if let None = unsafe { msgs::DAMAGE } {
+    } else if let None = unsafe { msgs::DAMAGE } {
         unsafe { msgs::DAMAGE = meta::get_user_msg_id(cstr!("Damage"), null_mut()) };
-    }
-    else if let None = unsafe { msgs::DEATH_MSG } {
+    } else if let None = unsafe { msgs::DEATH_MSG } {
         unsafe { msgs::DEATH_MSG = meta::get_user_msg_id(cstr!("DeathMsg"), null_mut()) };
-    }
-    else if let None = unsafe { msgs::TEAM_INFO } {
+    } else if let None = unsafe { msgs::TEAM_INFO } {
         unsafe { msgs::TEAM_INFO = meta::get_user_msg_id(cstr!("TeamInfo"), null_mut()) };
-    }
-    else if let None = unsafe { msgs::WEAPON_LIST } {
+    } else if let None = unsafe { msgs::WEAPON_LIST } {
         unsafe { msgs::WEAPON_LIST = meta::get_user_msg_id(cstr!("WeaponList"), null_mut()) };
-    }
-    else if let None = unsafe { msgs::MOTD } {
+    } else if let None = unsafe { msgs::MOTD } {
         unsafe { msgs::MOTD = meta::get_user_msg_id(cstr!("MOTD"), null_mut()) };
-    }
-    else if let None = unsafe { msgs::SERVER_NAME } {
+    } else if let None = unsafe { msgs::SERVER_NAME } {
         unsafe { msgs::SERVER_NAME = meta::get_user_msg_id(cstr!("ServerName"), null_mut()) };
-    }
-    else if let None = unsafe { msgs::HEALTH } {
+    } else if let None = unsafe { msgs::HEALTH } {
         unsafe { msgs::HEALTH = meta::get_user_msg_id(cstr!("Health"), null_mut()) };
-    }
-    else if let None = unsafe { msgs::BATTERY } {
+    } else if let None = unsafe { msgs::BATTERY } {
         unsafe { msgs::BATTERY = meta::get_user_msg_id(cstr!("Battery"), null_mut()) };
-    }
-    else if let None = unsafe { msgs::SHOW_MENU } {
+    } else if let None = unsafe { msgs::SHOW_MENU } {
         unsafe { msgs::SHOW_MENU = meta::get_user_msg_id(cstr!("ShowMenu"), null_mut()) };
-    }
-    else if let None = unsafe { msgs::SEND_AUDIO } {
+    } else if let None = unsafe { msgs::SEND_AUDIO } {
         unsafe { msgs::SEND_AUDIO = meta::get_user_msg_id(cstr!("SendAudio"), null_mut()) };
-    }
-    else if let None = unsafe { msgs::AMMO_X } {
+    } else if let None = unsafe { msgs::AMMO_X } {
         unsafe { msgs::AMMO_X = meta::get_user_msg_id(cstr!("AmmoX"), null_mut()) };
-    }
-    else if let None = unsafe { msgs::SCORE_INFO } {
+    } else if let None = unsafe { msgs::SCORE_INFO } {
         unsafe { msgs::SCORE_INFO = meta::get_user_msg_id(cstr!("ScoreInfo"), null_mut()) };
-    }
-    else if let None = unsafe { msgs::VGUI_MENU } {
+    } else if let None = unsafe { msgs::VGUI_MENU } {
         unsafe { msgs::VGUI_MENU = meta::get_user_msg_id(cstr!("VGUIMenu"), null_mut()) };
-    }
-    else if let None = unsafe { msgs::AMMO_PICKUP } {
+    } else if let None = unsafe { msgs::AMMO_PICKUP } {
         unsafe { msgs::AMMO_PICKUP = meta::get_user_msg_id(cstr!("AmmoPickup"), null_mut()) };
-    }
-    else if let None = unsafe { msgs::WEAP_PICKUP } {
+    } else if let None = unsafe { msgs::WEAP_PICKUP } {
         unsafe { msgs::WEAP_PICKUP = meta::get_user_msg_id(cstr!("WeapPickup"), null_mut()) };
-    }
-    else if let None = unsafe { msgs::RESET_HUD } {
+    } else if let None = unsafe { msgs::RESET_HUD } {
         unsafe { msgs::RESET_HUD = meta::get_user_msg_id(cstr!("ResetHUD"), null_mut()) };
-    }
-    else if let None = unsafe { msgs::ROUND_TIME } {
+    } else if let None = unsafe { msgs::ROUND_TIME } {
         unsafe { msgs::ROUND_TIME = meta::get_user_msg_id(cstr!("RoundTime"), null_mut()) };
-    }
-    else if let None = unsafe { msgs::SAY_TEXT } {
+    } else if let None = unsafe { msgs::SAY_TEXT } {
         unsafe { msgs::SAY_TEXT = meta::get_user_msg_id(cstr!("SayText"), null_mut()) };
-    }
-    else if let None = unsafe { msgs::INIT_HUD } {
+    } else if let None = unsafe { msgs::INIT_HUD } {
         unsafe { msgs::INIT_HUD = meta::get_user_msg_id(cstr!("InitHUD"), null_mut()) };
     }
 }
 
-static FUNCTION_TABLE_POST: LazyLock<abi::DLL_FUNCTIONS> = LazyLock::new(|| {abi::DLL_FUNCTIONS {
+static FUNCTION_TABLE_POST: LazyLock<abi::DLL_FUNCTIONS> = LazyLock::new(|| abi::DLL_FUNCTIONS {
     pfnClientPutInServer: Some(client_put_in_server_post),
     pfnServerActivate: Some(server_activate_post),
     ..Default::default()
-}});
+});
 
 pub extern "C" fn get_api_post(
     function_table: *mut abi::DLL_FUNCTIONS,

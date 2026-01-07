@@ -1,6 +1,5 @@
-use std::sync::OnceLock;
-
 use super::command;
+use std::sync::OnceLock;
 
 pub static INIT_FUNC: OnceLock<fn()> = OnceLock::new();
 pub static PRECACHE_FUNC: OnceLock<fn()> = OnceLock::new();

@@ -1,9 +1,5 @@
+use super::{api, convert, metamod::meta_const};
 use std::sync::RwLock;
-
-use crate::{
-    adapter::{api, convert},
-    metamod::meta_const,
-};
 
 static COMMANDS: RwLock<Vec<Command>> = RwLock::new(Vec::new());
 

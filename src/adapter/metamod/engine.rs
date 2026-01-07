@@ -1,13 +1,8 @@
 //! [abi::META_FUNCTIONS::pfnGetEngineFunctions] and [abi::META_FUNCTIONS::pfnGetEngineFunctions_Post] implementations
 
+use super::{abi, entry, meta, meta_const, msgs};
+use crate::util::log;
 use std::sync::LazyLock;
-
-use crate::{
-    metamod::{entry, meta_const},
-    util::log,
-};
-
-use super::{abi, meta, msgs};
 
 static ENG_FUNCS: LazyLock<abi::enginefuncs_t> = LazyLock::new(|| abi::enginefuncs_t {
     pfnMessageBegin: Some(message_begin),

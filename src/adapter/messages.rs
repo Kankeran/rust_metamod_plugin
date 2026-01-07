@@ -1,5 +1,5 @@
-use crate::{
-    adapter::{api, convert},
+use super::{
+    api, convert,
     metamod::{meta_api, meta_const},
 };
 
@@ -200,10 +200,14 @@ impl DHudMessage {
             meta_const::MSG_ONE_UNRELIABLE
         };
         meta_api::message_begin(msg_dest, meta_const::SVC_DIRECTOR, None, entity.as_ref());
-        meta_api::write_byte((msg.len()+31) as i32);
+        meta_api::write_byte((msg.len() + 31) as i32);
         meta_api::write_byte(meta_const::DRC_CMD_MESSAGE);
         meta_api::write_byte(self.style.effect);
-        meta_api::write_long((self.style.color1.b as i32) + ((self.style.color1.g as i32)<<8) + ((self.style.color1.r as i32)<<16));
+        meta_api::write_long(
+            (self.style.color1.b as i32)
+                + ((self.style.color1.g as i32) << 8)
+                + ((self.style.color1.r as i32) << 16),
+        );
         meta_api::write_long(f32_to_i32_raw(self.style.point.x));
         meta_api::write_long(f32_to_i32_raw(self.style.point.y));
         meta_api::write_long(f32_to_i32_raw(self.style.fade_in_time));
@@ -212,7 +216,6 @@ impl DHudMessage {
         meta_api::write_long(f32_to_i32_raw(self.style.fx_time));
         meta_api::write_string(msg);
         meta_api::message_end();
-
     }
 }
 
@@ -289,8 +292,8 @@ pub fn split_message_for_hud(src: &str) -> String {
     message
 }
 
-fn f32_to_i32_raw(value :f32) -> i32 {
-    unsafe{*((&raw const value) as *const i32)}
+fn f32_to_i32_raw(value: f32) -> i32 {
+    unsafe { *((&raw const value) as *const i32) }
 }
 
 #[cfg(test)]
@@ -361,7 +364,7 @@ mod tests {
 
     #[test]
     fn test_float_to_i32() {
-        let  a:f32 = 0.12;
+        let a: f32 = 0.12;
         assert_eq!(f32_to_i32_raw(a), 1039516303);
     }
 }

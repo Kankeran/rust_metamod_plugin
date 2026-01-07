@@ -1,6 +1,5 @@
+use super::metamod::meta_api;
 use std::sync::Mutex;
-
-use crate::metamod::meta_api;
 
 pub const MAX_PLAYERS: usize = 32;
 

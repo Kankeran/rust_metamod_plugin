@@ -1,13 +1,10 @@
-use std::sync::Mutex;
-
-use crate::{
-    adapter::{
-        api::{self, BlockMode},
-        convert,
-    },
+use super::{
+    api::{self, BlockMode},
+    convert,
     metamod::{meta_api, meta_const},
-    util::log,
 };
+use crate::util::log;
+use std::sync::Mutex;
 
 static MSG: Mutex<Option<RawMessage>> = Mutex::new(None);
 static mut MSG_BLOCKS: [BlockMode; 256] = [BlockMode::BlockNone; 256];
@@ -18,10 +15,10 @@ static mut MSG_TYPE_CURRENT: i32 = 0;
 static mut HOOK_CURRENT: bool = false;
 static mut BLOCK_CURRENT: bool = false;
 
-pub fn handle_msg(msg_type: api::UserMsgs) { // TODO: remove after tests
+pub fn handle_msg(msg_type: api::UserMsgs) {
+    // TODO: remove after tests
     if let Some(msg_type) = convert::user_msg_id(&msg_type) {
-
-        unsafe {MSG_HOOKS[msg_type as usize] = true}
+        unsafe { MSG_HOOKS[msg_type as usize] = true }
     }
 }
 

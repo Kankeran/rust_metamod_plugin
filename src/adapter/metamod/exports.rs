@@ -1,7 +1,4 @@
-use super::abi;
-use super::engine;
-use super::entity_api2;
-use super::meta;
+use super::{abi, engine, entity_api2, meta};
 use crate::adapter::bootstrap;
 use crate::util::log;
 
@@ -40,7 +37,10 @@ pub extern "C" fn meta_query(
     let engine_ifvers = meta::c_char_to_string(interface_version);
 
     if engine_ifvers != plugin_required_version {
-        log::error(&format!("meta interface version mismatch, expected {}, got {}", &plugin_required_version, &engine_ifvers));
+        log::error(&format!(
+            "meta interface version mismatch, expected {}, got {}",
+            &plugin_required_version, &engine_ifvers
+        ));
         return 0;
     }
 
@@ -71,7 +71,7 @@ pub extern "C" fn meta_attach(
         return 0;
     }
 
-    if now > unsafe{meta::PLUGIN_INFO.loadable} {
+    if now > unsafe { meta::PLUGIN_INFO.loadable } {
         log::error("Can't load	plugin right now");
         return 0;
     }

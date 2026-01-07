@@ -1,30 +1,31 @@
 use std::ffi::CString;
 
-use crate::{
-    adapter::{command, entry, messages::{DHudMessage, HudMessage, ShowMenuMessage, TextMessage}},
-    metamod::{meta, meta_api}, util::log,
+use super::metamod::{meta, meta_api};
+use crate::adapter::{
+    command, entry,
+    messages::{DHudMessage, HudMessage, ShowMenuMessage, TextMessage},
 };
 
-pub use meta_api::EdictPtr;
-pub use crate::adapter::messages_handler::handle_msg;
-pub use crate::adapter::messages::HudChannel;
-pub use crate::adapter::messages::Point;
 pub use crate::adapter::messages::Color;
+pub use crate::adapter::messages::HudChannel;
 pub use crate::adapter::messages::HudStyle;
+pub use crate::adapter::messages::Point;
+pub use crate::adapter::messages_handler::handle_msg;
+pub use meta_api::EdictPtr;
 
 pub enum Return {
     Ignored,
     Handled,
     Override,
     Supercede,
-	DeferSupercede,
+    DeferSupercede,
 }
 
 #[derive(Clone, Copy)]
 pub enum BlockMode {
-	BlockNone,
-	BlockOne,
-	BlockAll,
+    BlockNone,
+    BlockOne,
+    BlockAll,
 }
 
 pub enum PrintMode {

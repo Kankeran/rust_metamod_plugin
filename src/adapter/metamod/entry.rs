@@ -1,6 +1,6 @@
 use std::sync::OnceLock;
 
-use crate::metamod::{abi, meta, meta_api, meta_const};
+use super::{abi, meta, meta_api, meta_const};
 
 pub struct EntryFuncs {
     init: fn(),

@@ -1,5 +1,5 @@
-use crate::{
-    adapter::api,
+use super::{
+    api,
     metamod::{meta_api, meta_const},
 };
 
@@ -23,12 +23,12 @@ pub fn print_mode(mode: &api::PrintMode) -> i32 {
 }
 
 pub fn to_print_mode(mode: i32) -> api::PrintMode {
-	match mode {
+    match mode {
         meta_const::PRINT_NOTIFY => api::PrintMode::PrintNotify,
         meta_const::PRINT_CONSOLE => api::PrintMode::PrintConsole,
         meta_const::PRINT_CHAT => api::PrintMode::PrintChat,
         meta_const::PRINT_CENTER => api::PrintMode::PrintCenter,
-		_ => api::PrintMode::PrintChat,
+        _ => api::PrintMode::PrintChat,
     }
 }
 
