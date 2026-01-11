@@ -7,7 +7,7 @@ use std::{
 static PRINT_FORMAT: &CStr = c"%s";
 
 static PLUGIN_IFVERS: &CStr = c"5:13";
-static PLUGIN_NAME: &CStr = c"rust print"; // check if c"rust print" works
+static PLUGIN_NAME: &CStr = c"rust print";
 static PLUGIN_VERSION: &CStr = c"1.0.0";
 static PLUGIN_DATE: &CStr = c"26.12.2025";
 static PLUGIN_AUTHOR: &CStr = c"AwIlL";

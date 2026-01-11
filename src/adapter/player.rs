@@ -16,7 +16,7 @@ pub fn get_mut_player(id: i32) {
 }
 
 pub fn get_player(id: i32) {
-    PLAYERS.lock().unwrap().as_mut().map(|p| {
+    PLAYERS.lock().unwrap().as_ref().map(|p| {
         let _p = &p[id as usize];
     });
 }

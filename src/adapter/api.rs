@@ -1,66 +1,25 @@
 use std::ffi::CString;
 
-use super::metamod::{meta, meta_api};
-use crate::adapter::{
+use super::metamod::{meta};
+use super::{
     command, entry,
     messages::{DHudMessage, HudMessage, ShowMenuMessage, TextMessage},
 };
 
-pub use crate::adapter::messages::Color;
-pub use crate::adapter::messages::HudChannel;
-pub use crate::adapter::messages::HudStyle;
-pub use crate::adapter::messages::Point;
-pub use crate::adapter::messages_handler::handle_msg;
-pub use meta_api::EdictPtr;
+pub use super::messages::Color;
+pub use super::messages::HudChannel;
+pub use super::messages::HudStyle;
+pub use super::messages::Point;
+// pub use super::messages_handler::handle_msg;
+// pub use meta_api::EdictPtr;
+pub use super::common_types::Return;
+pub use super::common_types::BlockMode;
+pub use super::common_types::PrintMode;
+pub use super::common_types::UserMsgs;
 
-pub enum Return {
-    Ignored,
-    Handled,
-    Override,
-    Supercede,
-    DeferSupercede,
-}
 
-#[derive(Clone, Copy)]
-pub enum BlockMode {
-    BlockNone,
-    BlockOne,
-    BlockAll,
-}
 
-pub enum PrintMode {
-    PrintNotify,
-    PrintConsole,
-    PrintChat,
-    PrintCenter,
-}
 
-#[derive(Debug)]
-pub enum UserMsgs {
-    TextMsg,
-    BarTime,
-    CurWeapon,
-    Damage,
-    DeathMsg,
-    TeamInfo,
-    WeaponList,
-    MOTD,
-    ServerName,
-    Health,
-    Battery,
-    ShowMenu,
-    SendAudio,
-    AmmoX,
-    ScoreInfo,
-    VguiMenu,
-    AmmoPickup,
-    WeapPickup,
-    ResetHud,
-    RoundTime,
-    SayText,
-    InitHud,
-    SvcTempEntity,
-}
 
 pub fn setup_entry(init: fn(), precache: fn()) -> Result<(), fn()> {
     entry::INIT_FUNC.set(init)?;

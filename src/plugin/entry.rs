@@ -1,6 +1,4 @@
-use std::fmt::format;
-
-use crate::{adapter::api, util::log};
+use crate::adapter::api;
 
 pub fn plugin_init() {
     api::console_debug("jest init");
@@ -83,7 +81,12 @@ fn on_hud(id: i32, _arguments: &Vec<String>) -> api::Return {
         hold_time: 1.0,
         fx_time: 0.0,
     };
-    api::show_hud_message(Some(id), style, api::HudChannel::One, format!("piekny hud :)"));
+    api::show_hud_message(
+        Some(id),
+        style,
+        api::HudChannel::One,
+        format!("piekny hud :)"),
+    );
 
     api::Return::Ignored
 }
