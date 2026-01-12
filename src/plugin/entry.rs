@@ -1,53 +1,78 @@
-use crate::adapter::api;
+use crate::adapter::api::{self, NumKeys};
 
 pub fn plugin_init() {
     api::console_debug("jest init");
     api::register_client_command(
         String::from("say"),
         Some(String::from("/classes")),
-        on_classes_command,
+        Box::new(on_classes_command),
     );
     api::register_client_command(
         String::from("say"),
         Some(String::from("/class")),
-        on_class_command,
+        Box::new(on_class_command),
     );
-    api::register_client_command(String::from("rust_test"), None, on_rust_test);
+    api::register_client_command(String::from("rust_test"), None, Box::new(on_rust_test));
     // api::handle_msg(api::UserMsgs::Damage);
-    api::register_client_command(String::from("say"), Some(String::from("/menu")), on_menu);
-    api::register_client_command(String::from("say"), Some(String::from("/hud")), on_hud);
-    api::register_client_command(String::from("say"), Some(String::from("/dhud")), on_dhud);
+    api::register_client_command(
+        String::from("say"),
+        Some(String::from("/menu")),
+        Box::new(on_menu),
+    );
+    api::register_client_command(
+        String::from("say"),
+        Some(String::from("/menu2")),
+        Box::new(on_menu2),
+    );
+    api::register_client_command(
+        String::from("say"),
+        Some(String::from("/hud")),
+        Box::new(on_hud),
+    );
+    api::register_client_command(
+        String::from("say"),
+        Some(String::from("/dhud")),
+        Box::new(on_dhud),
+    );
 }
 
 pub fn plugin_precache() {}
 
 fn on_classes_command(id: i32, _arguments: &Vec<String>) -> api::Return {
     api::console_debug("jest client command 'classes'");
-    api::client_print(Some(id), api::PrintMode::PrintChat, "YOLO classes chat");
+    api::client_print(
+        Some(id),
+        api::PrintMode::PrintChat,
+        "YOLO classes chat".to_owned(),
+    );
     api::client_print(
         Some(id),
         api::PrintMode::PrintConsole,
-        "YOLO classes console\n",
+        "YOLO classes console\n".to_owned(),
     );
     api::client_print(
         Some(id),
         api::PrintMode::PrintNotify,
-        "YOLO classes notify\n",
+        "YOLO classes notify\n".to_owned(),
     );
-    api::client_print(Some(id), api::PrintMode::PrintCenter, "YOLO classes center");
+    api::client_print(
+        Some(id),
+        api::PrintMode::PrintCenter,
+        "YOLO classes center".to_owned(),
+    );
 
     api::Return::Ignored
 }
 
 fn on_class_command(_id: i32, _arguments: &Vec<String>) -> api::Return {
     api::console_debug("jest client command 'class'");
-    api::client_print(None, api::PrintMode::PrintChat, "ELO class");
+    api::client_print(None, api::PrintMode::PrintChat, "ELO class".to_owned());
 
     api::Return::Supercede
 }
 
 fn on_rust_test(id: i32, _arguments: &Vec<String>) -> api::Return {
-    api::client_print(Some(id), api::PrintMode::PrintChat, "rust test");
+    api::client_print(Some(id), api::PrintMode::PrintChat, "rust test".to_owned());
 
     api::Return::Ignored
 }
@@ -55,11 +80,46 @@ fn on_rust_test(id: i32, _arguments: &Vec<String>) -> api::Return {
 fn on_menu(id: i32, _arguments: &Vec<String>) -> api::Return {
     api::show_menu(
         id,
-        1023,
-        10,
-        format!(
-            "Elo\\r3\\y2\\w0\ngskhegskeghskjdghsd\nfrkshfekfsuehfksuehfukshefs\n\\r5.\\w hahahahah\nsdkjghserhgrshgsrhgrhgkldhrgkljhdsrgkhdrkglshdrkslghskldrhgkdsjhrkg\nkjehfjsekgfjesgfjksegfjhsgefjsgejfgsejfgskjefgjshdgfjshbfejhbsef\nkjehkslfhejhfgsejhgfsjegfjsegfjskdgfjds"
-        ),
+        Box::new(|_id: i32, menu: &mut api::Menu| {
+            menu.add_line("\\yawesome title", NumKeys::KeyNone); // title
+            menu.add_line("", NumKeys::KeyNone); // blank
+            menu.add_line("\\r1. \\welo", NumKeys::Key1); // item 1
+            menu.add_line("", NumKeys::KeyNone); // brank
+            menu.add_line("\\d3. elo2", NumKeys::KeyNone); // disabled item 3
+
+            menu.add_line("\\r4. \\yYO", NumKeys::Key4); // item 4
+
+            menu.add_line("\\welo321", NumKeys::KeyNone); // text
+            menu.add_line("\\r0. \\yexit", NumKeys::Key0); // exit 0.
+        }),
+        Box::new(|id, item| {
+            api::client_print(
+                Some(id),
+                api::PrintMode::PrintChat,
+                format!("wybrano {}", item),
+            );
+        }),
+    );
+
+    api::Return::Ignored
+}
+
+fn on_menu2(id: i32, _arguments: &Vec<String>) -> api::Return {
+    api::show_menu(
+        id,
+        Box::new(|_id: i32, menu: &mut api::Menu| {
+            menu.add_line("\\ysuper ciekawe menu\nbez jakichkolwiek opcji\nto menu niesie tylko informacje", NumKeys::KeyNone); // title
+            menu.add_line("cokolwiek klikniesz", NumKeys::KeyNone);
+            menu.add_line("to menu zniknie", NumKeys::KeyNone);
+            menu.add_keys(&[NumKeys::KeyAll]);
+        }),
+        Box::new(|id, item| {
+            api::client_print(
+                Some(id),
+                api::PrintMode::PrintChat,
+                format!("wybrano {}", item),
+            );
+        }),
     );
 
     api::Return::Ignored

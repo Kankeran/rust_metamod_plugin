@@ -1,5 +1,5 @@
 use super::{
-    api, convert,
+    api,
     metamod::{meta_api, meta_const},
 };
 
@@ -25,7 +25,7 @@ impl TextMessage {
                 meta_const::MSG_ONE
             };
             meta_api::message_begin(msg_dest, msg_id, None, entity.as_ref());
-            meta_api::write_byte(convert::print_mode(&self.mode));
+            meta_api::write_byte(self.mode.to_i32());
             meta_api::write_string(msg);
             meta_api::message_end();
         }
@@ -56,7 +56,8 @@ impl ShowMenuMessage {
                 return;
             }
             let mut msg;
-            let mut next_msg = self.buf.as_str();
+            let point = self.buf.floor_char_boundary(511); // max length of menu
+            let (mut next_msg, _) = self.buf.split_at(point);
             loop {
                 let point = next_msg.floor_char_boundary(175);
                 (msg, next_msg) = next_msg.split_at(point);

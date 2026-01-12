@@ -3,7 +3,7 @@ use std::ffi::CString;
 use super::metamod::{meta};
 use super::{
     command, entry,
-    messages::{DHudMessage, HudMessage, ShowMenuMessage, TextMessage},
+    messages::{DHudMessage, HudMessage, TextMessage},
 };
 
 pub use super::messages::Color;
@@ -16,10 +16,9 @@ pub use super::common_types::Return;
 pub use super::common_types::BlockMode;
 pub use super::common_types::PrintMode;
 pub use super::common_types::UserMsgs;
-
-
-
-
+pub use super::menu::show_menu;
+pub use super::menu::Menu;
+pub use super::menu::NumKeys;
 
 pub fn setup_entry(init: fn(), precache: fn()) -> Result<(), fn()> {
     entry::INIT_FUNC.set(init)?;
@@ -29,17 +28,13 @@ pub fn setup_entry(init: fn(), precache: fn()) -> Result<(), fn()> {
 pub fn register_client_command(
     command: String,
     argument: Option<String>,
-    callback: fn(i32, &Vec<String>) -> Return,
+    callback: Box<dyn Fn(i32, &Vec<String>) -> Return + Send + Sync>,
 ) {
     command::add_client_command(command::Command::new(command, argument, callback))
 }
 
-pub fn client_print(id: Option<i32>, mode: PrintMode, msg: &str) {
-    TextMessage::new(id, mode, msg.to_owned()).send();
-}
-
-pub fn show_menu(id: i32, keys: i32, time: i32, buf: String) {
-    ShowMenuMessage::new(id, keys, time, buf).send();
+pub fn client_print(id: Option<i32>, mode: PrintMode, msg: String) {
+    TextMessage::new(id, mode, msg).send();
 }
 
 pub fn show_hud_message(id: Option<i32>, style: HudStyle, channel: HudChannel, message: String) {

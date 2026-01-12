@@ -1,4 +1,5 @@
-use super::{api, convert, metamod::meta_const};
+use crate::adapter::{common_types::Return, menu};
+
 use std::sync::RwLock;
 
 static COMMANDS: RwLock<Vec<Command>> = RwLock::new(Vec::new());
@@ -7,24 +8,25 @@ pub fn add_client_command(command: Command) {
     COMMANDS.write().unwrap().push(command);
 }
 
-pub fn handle_client_command(id: i32, arguments: &Vec<String>) -> i32 {
-    let mut result = meta_const::RESULT_IGNORED;
+pub fn handle_client_command(id: i32, arguments: &Vec<String>) -> Return {
+    let mut result = Return::Ignored;
+    let command = &arguments[0];
+    let argument = &arguments[1];
     if let Ok(cmds) = COMMANDS.read() {
-        let command = &arguments[0];
-        let argument = &arguments[1];
         for cmd in cmds.iter() {
             if cmd.equal(command, argument) {
                 let res = (cmd.callback)(id, arguments);
-                if let api::Return::Supercede = res {
-                    return meta_const::RESULT_SUPERCEDE;
+                if let Return::Supercede = res {
+                    return Return::Supercede;
                 }
-                let res = convert::result(&res);
-                if res > result {
+                if result.lt(&res) {
                     result = res
                 }
             }
         }
     }
+
+    menu::handle_menu_select(id, command,argument );
 
     result
 }
@@ -32,14 +34,14 @@ pub fn handle_client_command(id: i32, arguments: &Vec<String>) -> i32 {
 pub struct Command {
     command: String,
     argument: Option<String>,
-    callback: fn(i32, &Vec<String>) -> api::Return,
+    callback: Box<dyn Fn(i32, &Vec<String>) -> Return + Send + Sync>,
 }
 
-impl Command {
+impl Command{
     pub fn new(
         command: String,
         argument: Option<String>,
-        callback: fn(i32, &Vec<String>) -> api::Return,
+        callback: Box<dyn Fn(i32, &Vec<String>) -> Return + Send + Sync>,
     ) -> Command {
         Command {
             command,
