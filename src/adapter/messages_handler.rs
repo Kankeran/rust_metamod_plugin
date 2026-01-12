@@ -1,37 +1,42 @@
 use super::{
-    api::{self, BlockMode},
+    api,
+    common_types::BlockMode,
     metamod::{meta_api, meta_const},
 };
-use crate::{adapter::api::UserMsgs, util::log};
+use crate::{adapter::{api::UserMsgs, text_message_handler}, util::log};
 use std::sync::Mutex;
 
 static MSG: Mutex<Option<RawMessage>> = Mutex::new(None);
-static mut MSG_BLOCKS: [BlockMode; 256] = [BlockMode::BlockNone; 256];
-// TODO: change logic when registration messages will be possible, bool for now
+static mut MSG_BLOCKS: [BlockMode; 256] = [const { BlockMode::BlockNone }; 256];
 static mut MSG_HOOKS: [bool; 256] = [false; 256];
 
 static mut MSG_TYPE_CURRENT: i32 = 0;
 static mut HOOK_CURRENT: bool = false;
 static mut BLOCK_CURRENT: bool = false;
 
-pub fn handle_msg(msg_type: api::UserMsgs) {
-    // TODO: remove after tests
+pub fn register_msg_handler(msg_type: UserMsgs) {
     if let Some(msg_type) = msg_type.to_option_i32() {
         unsafe { MSG_HOOKS[msg_type as usize] = true }
     }
 }
 
-#[derive(Debug)]
-pub struct RawMessage {
-    msg_dest: i32,
-    msg_type: i32,
-    origin: Option<[f32; 3]>,
-    ent: Option<meta_api::EdictPtr>,
-    data: Vec<MessageValue>,
+pub fn block_msg(msg_type: UserMsgs, block_mode: BlockMode) {
+    if let Some(msg_type) = msg_type.to_option_i32() {
+        unsafe { MSG_BLOCKS[msg_type as usize] = block_mode }
+    }
 }
 
 #[derive(Debug)]
-enum MessageValue {
+pub struct RawMessage {
+    pub msg_dest: i32,
+    pub msg_type: i32,
+    pub origin: Option<[f32; 3]>,
+    pub ent: Option<meta_api::EdictPtr>,
+    pub data: Vec<MessageValue>,
+}
+
+#[derive(Debug)]
+pub enum MessageValue {
     Byte(i32),
     Char(i32),
     Short(i32),
@@ -64,6 +69,13 @@ impl RawMessage {
 
     fn handle_message(self) {
         // parse to specific message and handle callbacks here :)
+        if let Some(msg_type) = UserMsgs::try_from_i32(self.msg_type) {
+            match msg_type {
+                UserMsgs::TextMsg => {text_message_handler::handle_text_message(self.to_text_message());}, // ignore return for now
+                _ => {}
+            }
+        }
+
         log::debug(&format!("msg: {:?}", self));
         self.send();
     }
@@ -105,7 +117,7 @@ pub fn message_begin(
         msg_type,
         id
     ));
-    if let BlockMode::BlockAll | BlockMode::BlockOne = unsafe { MSG_BLOCKS[msg_type as usize] } {
+    if let BlockMode::BlockAll | BlockMode::BlockOne = unsafe { &MSG_BLOCKS[msg_type as usize] } {
         log::debug("block message");
         unsafe {
             BLOCK_CURRENT = true;
@@ -247,7 +259,7 @@ pub fn message_end() -> i32 {
         unsafe {
             BLOCK_CURRENT = false;
         }
-        if let BlockMode::BlockOne = unsafe { MSG_BLOCKS[MSG_TYPE_CURRENT as usize] } {
+        if let BlockMode::BlockOne = unsafe { &MSG_BLOCKS[MSG_TYPE_CURRENT as usize] } {
             unsafe {
                 MSG_BLOCKS[MSG_TYPE_CURRENT as usize] = BlockMode::BlockNone;
             }

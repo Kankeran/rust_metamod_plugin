@@ -1,10 +1,12 @@
+#[allow(unused_imports)]
 pub mod api;
-pub mod bootstrap;
+mod bootstrap;
 mod command;
+mod common_types;
 mod entry;
-pub mod messages;
+mod menu;
+mod messages;
 mod messages_handler;
 mod metamod;
 mod player;
-mod common_types;
-mod menu;
+mod text_message_handler;

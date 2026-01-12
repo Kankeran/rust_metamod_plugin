@@ -1,4 +1,4 @@
-use crate::adapter::api::{self, NumKeys};
+use crate::adapter::api::{self, NumKeys, console_log};
 
 pub fn plugin_init() {
     api::console_debug("jest init");
@@ -34,6 +34,8 @@ pub fn plugin_init() {
         Some(String::from("/dhud")),
         Box::new(on_dhud),
     );
+
+    api::register_text_message(Box::new(|msg| {console_log(&format!("przechwycono msg {:?}", msg)); api::Return::Ignored}));
 }
 
 pub fn plugin_precache() {}
@@ -108,7 +110,7 @@ fn on_menu2(id: i32, _arguments: &Vec<String>) -> api::Return {
     api::show_menu(
         id,
         Box::new(|_id: i32, menu: &mut api::Menu| {
-            menu.add_line("\\ysuper ciekawe menu\nbez jakichkolwiek opcji\nto menu niesie tylko informacje", NumKeys::KeyNone); // title
+            menu.add_line("\\ysuper ciekawe menu\nbez jakichkolwiek opcji\nto menu niesie tylko informacje", NumKeys::KeyNone);
             menu.add_line("cokolwiek klikniesz", NumKeys::KeyNone);
             menu.add_line("to menu zniknie", NumKeys::KeyNone);
             menu.add_keys(&[NumKeys::KeyAll]);

@@ -1,18 +1,17 @@
 use crate::adapter::{common_types::Return, menu};
+use std::sync::Mutex;
 
-use std::sync::RwLock;
-
-static COMMANDS: RwLock<Vec<Command>> = RwLock::new(Vec::new());
+static COMMANDS: Mutex<Vec<Command>> = Mutex::new(Vec::new());
 
 pub fn add_client_command(command: Command) {
-    COMMANDS.write().unwrap().push(command);
+    COMMANDS.lock().unwrap().push(command);
 }
 
 pub fn handle_client_command(id: i32, arguments: &Vec<String>) -> Return {
     let mut result = Return::Ignored;
     let command = &arguments[0];
     let argument = &arguments[1];
-    if let Ok(cmds) = COMMANDS.read() {
+    if let Ok(cmds) = COMMANDS.lock() {
         for cmd in cmds.iter() {
             if cmd.equal(command, argument) {
                 let res = (cmd.callback)(id, arguments);
@@ -26,23 +25,21 @@ pub fn handle_client_command(id: i32, arguments: &Vec<String>) -> Return {
         }
     }
 
-    menu::handle_menu_select(id, command,argument );
+    menu::handle_menu_select(id, command, argument);
 
     result
 }
 
+type CommandCallback = Box<dyn Fn(i32, &Vec<String>) -> Return + Send + Sync + 'static>;
+
 pub struct Command {
     command: String,
     argument: Option<String>,
-    callback: Box<dyn Fn(i32, &Vec<String>) -> Return + Send + Sync>,
+    callback: CommandCallback,
 }
 
-impl Command{
-    pub fn new(
-        command: String,
-        argument: Option<String>,
-        callback: Box<dyn Fn(i32, &Vec<String>) -> Return + Send + Sync>,
-    ) -> Command {
+impl Command {
+    pub fn new(command: String, argument: Option<String>, callback: CommandCallback) -> Command {
         Command {
             command,
             argument,

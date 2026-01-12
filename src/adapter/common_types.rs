@@ -34,13 +34,14 @@ impl Return {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Debug)]
 pub enum BlockMode {
     BlockNone,
     BlockOne,
     BlockAll,
 }
 
+#[derive(Debug)]
 pub enum PrintMode {
     PrintNotify,
     PrintConsole,

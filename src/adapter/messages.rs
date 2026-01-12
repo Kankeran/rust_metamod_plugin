@@ -1,17 +1,28 @@
-use super::{
-    api,
-    metamod::{meta_api, meta_const},
-};
+use super::common_types::PrintMode;
+use super::metamod::{meta_api, meta_const};
 
+#[derive(Debug)]
 pub struct TextMessage {
     id: Option<i32>,
-    mode: api::PrintMode,
+    mode: PrintMode,
     msg: String,
 }
 
 impl TextMessage {
-    pub fn new(id: Option<i32>, mode: api::PrintMode, msg: String) -> Self {
+    pub fn new(id: Option<i32>, mode: PrintMode, msg: String) -> Self {
         TextMessage { id, mode, msg }
+    }
+
+    pub fn get_id(&self) -> Option<i32> {
+        self.id
+    }
+
+    pub fn get_print_mode(&self) -> &PrintMode {
+        &self.mode
+    }
+
+    pub fn get_msg(&self) -> &str {
+        &self.msg
     }
 
     pub fn send(&self) {
