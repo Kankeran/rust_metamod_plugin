@@ -36,6 +36,8 @@ pub fn plugin_init() {
     );
 
     api::register_text_message(Box::new(|msg| {console_log(&format!("przechwycono msg {:?}", msg)); api::Return::Ignored}));
+
+    api::register_take_damage("player", take_damage);
 }
 
 pub fn plugin_precache() {}
@@ -170,6 +172,16 @@ fn on_dhud(id: i32, _arguments: &Vec<String>) -> api::Return {
         fx_time: 0.0,
     };
     api::show_dhud_message(Some(id), style, format!("piekny dhud :)"));
+
+    api::Return::Ignored
+}
+
+fn take_damage(this: i32, inflictor: i32, attacker: i32, damage: f32, damagebits: i32) -> api::Return {
+    if this > 32 {
+        return api::Return::Ignored;
+    }
+
+    api::client_print(Some(this), api::PrintMode::PrintChat, format!("oberwales za {damage}"));
 
     api::Return::Ignored
 }

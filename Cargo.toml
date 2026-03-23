@@ -11,3 +11,4 @@ panic = "abort"
 
 [dependencies]
 cstr = "0.2.12"
+region = "3.0.2"

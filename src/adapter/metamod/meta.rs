@@ -98,6 +98,14 @@ pub fn get_user_msg_id(msg_name: &CStr, size: *mut i32) -> Option<i32> {
     None
 }
 
+pub fn call_game_entity(ent_name: &CStr, pev: *mut abi::entvars_t) -> Option<i32> {
+    META_UTIL_FUNCS
+        .get()
+        .map(|api| api.pfnCallGameEntity)
+        .flatten()
+        .map(|f| unsafe { f(&raw mut PLUGIN_INFO, ent_name.as_ptr(),pev ) })
+}
+
 // engine funcs
 
 pub static ENG_FUNCS: OnceLock<abi::enginefuncs_t> = OnceLock::new();
@@ -130,4 +138,20 @@ pub fn alert(msg: &CStr) {
             }
         }
     }
+}
+
+pub fn create_entity() -> Option<*mut abi::edict_t> {
+    ENG_FUNCS
+        .get()
+        .map(|api| api.pfnCreateEntity)
+        .flatten()
+        .map(|f| unsafe { f() })
+}
+
+pub fn remove_entity(ent: *mut abi::edict_t) {
+    ENG_FUNCS
+        .get()
+        .map(|api| api.pfnRemoveEntity)
+        .flatten()
+        .map(|f| unsafe { f(ent) });
 }

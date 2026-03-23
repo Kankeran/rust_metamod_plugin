@@ -118,7 +118,7 @@ pub fn message_begin(
         id
     ));
     if let BlockMode::BlockAll | BlockMode::BlockOne = unsafe { &MSG_BLOCKS[msg_type as usize] } {
-        log::debug("block message");
+        api::console_debug("block message");
         unsafe {
             BLOCK_CURRENT = true;
             MSG_TYPE_CURRENT = msg_type;
@@ -126,7 +126,7 @@ pub fn message_begin(
 
         meta_const::RESULT_SUPERCEDE
     } else if unsafe { MSG_HOOKS[msg_type as usize] } {
-        log::debug("hook message");
+        api::console_debug("hook message");
         unsafe {
             HOOK_CURRENT = true;
             MSG_TYPE_CURRENT = msg_type;
@@ -141,7 +141,7 @@ pub fn message_begin(
 }
 
 pub fn write_byte(value: i32) -> i32 {
-    api::console_debug(&format!("write_byte | value {:?}", value));
+    // api::console_debug(&format!("write_byte | value {:?}", value));
 
     if unsafe { BLOCK_CURRENT } {
         meta_const::RESULT_SUPERCEDE
@@ -155,7 +155,7 @@ pub fn write_byte(value: i32) -> i32 {
 }
 
 pub fn write_char(value: i32) -> i32 {
-    api::console_debug(&format!("write_char | value {:?}", value));
+    // api::console_debug(&format!("write_char | value {:?}", value));
 
     if unsafe { BLOCK_CURRENT } {
         meta_const::RESULT_SUPERCEDE
@@ -169,7 +169,7 @@ pub fn write_char(value: i32) -> i32 {
 }
 
 pub fn write_short(value: i32) -> i32 {
-    api::console_debug(&format!("write_short | value {:?}", value));
+    // api::console_debug(&format!("write_short | value {:?}", value));
 
     if unsafe { BLOCK_CURRENT } {
         meta_const::RESULT_SUPERCEDE
@@ -183,7 +183,7 @@ pub fn write_short(value: i32) -> i32 {
 }
 
 pub fn write_long(value: i32) -> i32 {
-    api::console_debug(&format!("write_long | value {:?}", value));
+    // api::console_debug(&format!("write_long | value {:?}", value));
 
     if unsafe { BLOCK_CURRENT } {
         meta_const::RESULT_SUPERCEDE
@@ -197,7 +197,7 @@ pub fn write_long(value: i32) -> i32 {
 }
 
 pub fn write_angle(value: f32) -> i32 {
-    api::console_debug(&format!("write_angle | value {:?}", value));
+    // api::console_debug(&format!("write_angle | value {:?}", value));
 
     if unsafe { BLOCK_CURRENT } {
         meta_const::RESULT_SUPERCEDE
@@ -211,7 +211,7 @@ pub fn write_angle(value: f32) -> i32 {
 }
 
 pub fn write_coord(value: f32) -> i32 {
-    api::console_debug(&format!("write_coord | value {:?}", value));
+    // api::console_debug(&format!("write_coord | value {:?}", value));
 
     if unsafe { BLOCK_CURRENT } {
         meta_const::RESULT_SUPERCEDE
@@ -225,7 +225,7 @@ pub fn write_coord(value: f32) -> i32 {
 }
 
 pub fn write_string(value: String) -> i32 {
-    api::console_debug(&format!("write_string | value {:?}", value));
+    // api::console_debug(&format!("write_string | value {:?}", value));
 
     if unsafe { BLOCK_CURRENT } {
         meta_const::RESULT_SUPERCEDE
@@ -239,7 +239,7 @@ pub fn write_string(value: String) -> i32 {
 }
 
 pub fn write_entity(value: i32) -> i32 {
-    api::console_debug(&format!("write_entity | value {:?}", value));
+    // api::console_debug(&format!("write_entity | value {:?}", value));
 
     if unsafe { BLOCK_CURRENT } {
         meta_const::RESULT_SUPERCEDE
@@ -253,7 +253,7 @@ pub fn write_entity(value: i32) -> i32 {
 }
 
 pub fn message_end() -> i32 {
-    api::console_debug("message_end");
+    // api::console_debug("message_end");
 
     if unsafe { BLOCK_CURRENT } {
         unsafe {
@@ -284,61 +284,61 @@ pub fn message_begin_post(
     _origin: Option<[f32; 3]>,
     _ent: Option<meta_api::EdictPtr>,
 ) -> i32 {
-    api::console_debug("message_begin_post");
+    // api::console_debug("message_begin_post");
 
     meta_const::RESULT_IGNORED
 }
 
 pub fn write_byte_post(_value: i32) -> i32 {
-    api::console_debug("write_byte_post");
+    // api::console_debug("write_byte_post");
 
     meta_const::RESULT_IGNORED
 }
 
 pub fn write_char_post(_value: i32) -> i32 {
-    api::console_debug("write_char_post");
+    // api::console_debug("write_char_post");
 
     meta_const::RESULT_IGNORED
 }
 
 pub fn write_short_post(_value: i32) -> i32 {
-    api::console_debug("write_short_post");
+    // api::console_debug("write_short_post");
 
     meta_const::RESULT_IGNORED
 }
 
 pub fn write_long_post(_value: i32) -> i32 {
-    api::console_debug("write_long_post");
+    // api::console_debug("write_long_post");
 
     meta_const::RESULT_IGNORED
 }
 
 pub fn write_angle_post(_value: f32) -> i32 {
-    api::console_debug("write_angle_post");
+    // api::console_debug("write_angle_post");
 
     meta_const::RESULT_IGNORED
 }
 
 pub fn write_coord_post(_value: f32) -> i32 {
-    api::console_debug("write_coord_post");
+    // api::console_debug("write_coord_post");
 
     meta_const::RESULT_IGNORED
 }
 
 pub fn write_string_post(_value: String) -> i32 {
-    api::console_debug("write_string_post");
+    // api::console_debug("write_string_post");
 
     meta_const::RESULT_IGNORED
 }
 
 pub fn write_entity_post(_value: i32) -> i32 {
-    api::console_debug("write_entity_post");
+    // api::console_debug("write_entity_post");
 
     meta_const::RESULT_IGNORED
 }
 
 pub fn message_end_post() -> i32 {
-    api::console_debug("message_end_post");
+    // api::console_debug("message_end_post");
 
     meta_const::RESULT_IGNORED
 }

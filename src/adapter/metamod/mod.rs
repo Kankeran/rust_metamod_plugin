@@ -1,5 +1,5 @@
 #[allow(nonstandard_style)]
-mod abi;
+pub mod abi;
 pub mod adapter;
 pub mod meta_api;
 mod engine;
