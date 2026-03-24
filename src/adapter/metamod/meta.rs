@@ -155,3 +155,12 @@ pub fn remove_entity(ent: *mut abi::edict_t) {
         .flatten()
         .map(|f| unsafe { f(ent) });
 }
+
+pub fn get_player_auth_id(ent: *mut abi::edict_t) -> Option<String> {
+    ENG_FUNCS
+        .get()
+        .map(|api| api.pfnGetPlayerAuthId)
+        .flatten()
+        .map(|f| unsafe { f(ent) })
+        .map(|auth| c_char_to_string(auth))
+}

@@ -1,3 +1,5 @@
+use crate::adapter::specialbot;
+
 use super::command;
 use std::sync::OnceLock;
 
@@ -18,4 +20,8 @@ pub fn adapter_init() {
 
 pub fn client_command(id: i32, args: Vec<String>) -> i32 {
     command::handle_client_command(id, &args).to_i32()
+}
+
+pub fn set_client_key_value(client_index: i32, info_buffer: String, key: String, value: String) {
+    specialbot::set_client_key_value(client_index, info_buffer, key, value);
 }

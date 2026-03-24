@@ -177,10 +177,11 @@ fn on_dhud(id: i32, _arguments: &Vec<String>) -> api::Return {
 }
 
 fn take_damage(this: i32, inflictor: i32, attacker: i32, damage: f32, damagebits: i32) -> api::Return {
-    if this > 32 {
+    if this > 32 || attacker > 32 || this < 1 || attacker < 1 {
         return api::Return::Ignored;
     }
 
+    api::client_print(Some(attacker), api::PrintMode::PrintChat, format!("zadales za {damage}"));
     api::client_print(Some(this), api::PrintMode::PrintChat, format!("oberwales za {damage}"));
 
     api::Return::Ignored

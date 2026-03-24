@@ -11,9 +11,7 @@ use region::Allocation;
 
 use crate::{
     adapter::{
-        api::Return,
-        metamod::{abi, meta, meta_api},
-        trampoline,
+        api::Return, metamod::{abi, meta, meta_api}, specialbot, trampoline
     },
     util::log,
 };
@@ -29,16 +27,16 @@ pub static FIRST_EDICT: OnceLock<meta_api::EdictPtr> = OnceLock::new();
 /// Box::new(|id: i32, item: i32| {/* your code */})
 pub type TakeDamageCallback = fn(i32, i32, i32, f32, i32) -> Return;
 
-struct TakeDamageTrampoline {
-    tramp: Allocation,
+pub struct TakeDamageTrampoline {
+    pub tramp: Allocation,
 }
 
 unsafe impl Sync for TakeDamageTrampoline {}
 unsafe impl Send for TakeDamageTrampoline {}
 
-struct TakeDamageHook {
-    callback: TakeDamageCallback,
-    func: *mut c_void,
+pub struct TakeDamageHook {
+    pub callback: TakeDamageCallback,
+    pub func: *mut c_void,
 }
 
 unsafe impl Sync for TakeDamageHook {}
@@ -48,7 +46,7 @@ static TAKE_DAMAGE_TRAMPOLINE: Mutex<Option<TakeDamageTrampoline>> = Mutex::new(
 
 static mut TAKE_DAMAGE_HOOK: *const TakeDamageHook = null();
 
-fn get_vtable(this: *mut c_void, size: usize) -> *mut *mut c_void {
+pub fn get_vtable(this: *mut c_void, size: usize) -> *mut *mut c_void {
     unsafe { *((this.addr() + size) as *mut *mut *mut c_void) }
 }
 
@@ -99,7 +97,7 @@ fn cbase_to_id(cbase: *mut c_void) -> i32 {
     entvars_to_id(cbase_to_entvar(cbase))
 }
 
-extern "system" fn hook_take_damage(
+pub extern "system" fn hook_take_damage(
     hook: *const TakeDamageHook,
     this: *mut c_void,
     inflictor: *mut super::metamod::abi::entvars_t,
@@ -150,6 +148,9 @@ pub fn register_take_damage(ent_name: &str, callback: TakeDamageCallback) {
         log::error(&format!("Failed to retrieve vtable for \"{ent_name}\""));
         return;
     }
+
+    specialbot::register_special_bot_take_damage(callback);
+
     let damage_offset:usize = 12*4 ;
 
     let vfunction = unsafe { *((vtable.addr() + damage_offset) as *mut *mut c_void) }; // 12 - take damage offset, *4 - i32 size

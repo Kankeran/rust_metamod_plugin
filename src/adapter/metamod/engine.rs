@@ -6,7 +6,6 @@ use std::sync::LazyLock;
 
 static ENG_FUNCS: LazyLock<abi::enginefuncs_t> = LazyLock::new(|| abi::enginefuncs_t {
     pfnMessageBegin: Some(message_begin),
-    pfnMessageEnd: Some(message_end),
     pfnWriteByte: Some(write_byte),
     pfnWriteChar: Some(write_char),
     pfnWriteShort: Some(write_short),
@@ -15,6 +14,8 @@ static ENG_FUNCS: LazyLock<abi::enginefuncs_t> = LazyLock::new(|| abi::enginefun
     pfnWriteCoord: Some(write_coord),
     pfnWriteString: Some(write_string),
     pfnWriteEntity: Some(write_entity),
+    pfnMessageEnd: Some(message_end),
+    pfnSetClientKeyValue: Some(set_client_key_value),
     ..Default::default()
 });
 
@@ -82,6 +83,20 @@ extern "C" fn write_entity(value: ::std::os::raw::c_int) {
 
 extern "C" fn message_end() {
     meta::set_result(entry::message_end());
+}
+
+extern "C" fn set_client_key_value(
+    client_index: ::std::os::raw::c_int,
+    info_buffer: *mut ::std::os::raw::c_char,
+    key: *const ::std::os::raw::c_char,
+    value: *const ::std::os::raw::c_char,
+) {
+    let info_buffer = meta::c_char_to_string(info_buffer);
+    let key = meta::c_char_to_string(key);
+    let value = meta::c_char_to_string(value);
+
+    crate::adapter::entry::set_client_key_value(client_index, info_buffer, key, value);
+    meta::set_result(meta_const::RESULT_IGNORED);
 }
 
 static ENG_FUNCS_POST: LazyLock<abi::enginefuncs_t> = LazyLock::new(|| abi::enginefuncs_t {
