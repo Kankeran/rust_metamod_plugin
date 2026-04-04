@@ -1,4 +1,4 @@
-use crate::{adapter::api::{self, NumKeys}, util::log};
+use crate::{adapter::api::{self, HamCallback, NumKeys}, util::log};
 
 pub fn plugin_init() {
     log::info("init wywołany");
@@ -37,7 +37,10 @@ pub fn plugin_init() {
 
     // api::register_text_message(Box::new(|msg| {console_log(&format!("przechwycono msg {:?}", msg)); api::Return::Ignored}));
 
-    api::register_take_damage("player", take_damage);
+    api::register_take_damage("player", HamCallback::TakeDamagePost(take_damage_post));
+    api::register_take_damage("player", HamCallback::TakeDamage(take_damage));
+    api::register_take_damage("player", HamCallback::TakeDamagePost(take_damage_post2));
+    api::register_take_damage("player", HamCallback::TakeDamage(take_damage2));
 }
 
 pub fn plugin_precache() {}
@@ -176,7 +179,7 @@ fn on_dhud(id: i32, _arguments: &Vec<String>) -> api::Return {
     api::Return::Ignored
 }
 
-fn take_damage(this: i32, inflictor: i32, attacker: i32, damage: f32, damagebits: i32) -> api::Return {
+fn take_damage(this: i32, _inflictor: i32, attacker: i32, damage: f32, _damagebits: i32) -> api::Return {
     if this > 32 || attacker > 32 || this < 1 || attacker < 1 {
         return api::Return::Ignored;
     }
@@ -185,4 +188,33 @@ fn take_damage(this: i32, inflictor: i32, attacker: i32, damage: f32, damagebits
     api::client_print(Some(this), api::PrintMode::PrintChat, format!("oberwales za {damage}"));
 
     api::Return::Ignored
+}
+
+fn take_damage2(this: i32, _inflictor: i32, attacker: i32, damage: f32, _damagebits: i32) -> api::Return {
+    if this > 32 || attacker > 32 || this < 1 || attacker < 1 {
+        return api::Return::Ignored;
+    }
+
+    api::client_print(Some(attacker), api::PrintMode::PrintChat, format!("2 zadales za {damage}"));
+    api::client_print(Some(this), api::PrintMode::PrintChat, format!("2 oberwales za {damage}"));
+
+    api::Return::Ignored
+}
+
+fn take_damage_post(this: i32, _inflictor: i32, attacker: i32, damage: f32, _damagebits: i32) {
+    if this > 32 || attacker > 32 || this < 1 || attacker < 1 {
+        return;
+    }
+
+    api::client_print(Some(attacker), api::PrintMode::PrintChat, format!("POST zadales za {damage}"));
+    api::client_print(Some(this), api::PrintMode::PrintChat, format!("POST oberwales za {damage}"));
+}
+
+fn take_damage_post2(this: i32, _inflictor: i32, attacker: i32, damage: f32, _damagebits: i32) {
+    if this > 32 || attacker > 32 || this < 1 || attacker < 1 {
+        return;
+    }
+
+    api::client_print(Some(attacker), api::PrintMode::PrintChat, format!("POST2 zadales za {damage}"));
+    api::client_print(Some(this), api::PrintMode::PrintChat, format!("POST2 oberwales za {damage}"));
 }

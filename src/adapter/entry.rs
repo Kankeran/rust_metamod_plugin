@@ -20,5 +20,6 @@ pub fn set_client_key_value(client_index: i32, info_buffer: String, key: String,
 
 pub fn free_data() {
     action_handler::free_hooks();
+    specialbot::free_hooks();
     command::free_commands();
 }

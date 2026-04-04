@@ -28,6 +28,15 @@ pub static FIRST_EDICT: OnceLock<meta_api::EdictPtr> = OnceLock::new();
 /// Box::new(|this: i32, inflictor: i32, attacker: i32, damage: f32, damagebits: i32| {/* your code */})
 pub type TakeDamageCallback = fn(i32, i32, i32, f32, i32) -> Return;
 
+/// Box::new(|this: i32, inflictor: i32, attacker: i32, damage: f32, damagebits: i32| {/* your code */})
+pub type TakeDamageCallbackPost = fn(i32, i32, i32, f32, i32);
+
+#[derive(Clone)]
+pub enum HamCallback {
+    TakeDamage(TakeDamageCallback),
+    TakeDamagePost(TakeDamageCallbackPost),
+}
+
 pub struct TakeDamageTrampoline {
     pub tramp: Allocation,
 }
@@ -36,7 +45,8 @@ unsafe impl Sync for TakeDamageTrampoline {}
 unsafe impl Send for TakeDamageTrampoline {}
 
 pub struct TakeDamageHook {
-    pub callback: TakeDamageCallback,
+    pub callback_pre: Vec<TakeDamageCallback>,
+    pub callback_post: Vec<TakeDamageCallbackPost>,
     pub func: *mut c_void,
     pub vtable: *mut *mut c_void,
 }
@@ -48,7 +58,7 @@ static TAKE_DAMAGE_TRAMPOLINE: Mutex<Option<TakeDamageTrampoline>> = Mutex::new(
 
 static TAKE_DAMAGE_HOOK: Mutex<Option<Box<TakeDamageHook>>> = Mutex::new(None);
 
-const DAMAGE_OFFSET: usize = 12 * 4;
+pub const DAMAGE_OFFSET: usize = 12 * 4;
 
 pub fn get_vtable(this: *mut c_void, size: usize) -> *mut *mut c_void {
     unsafe { *((this.addr() + size) as *mut *mut *mut c_void) }
@@ -113,7 +123,10 @@ pub extern "system" fn hook_take_damage(
     let iattacker = entvars_to_id(attacker);
     // log::info(&format!("take damage wywolany2 {ithis} {iinflictor} {iattacker} {damage} {damagebits}"));
 
-    (unsafe { &*hook }.callback)(ithis, iinflictor, iattacker, damage, damagebits);
+    for callback in unsafe { &*hook }.callback_pre.iter() {
+        // TODO: handling returns
+        callback(ithis, iinflictor, iattacker, damage, damagebits);
+    }
 
     let run: extern "fastcall" fn(
         this: *mut c_void,
@@ -126,6 +139,10 @@ pub extern "system" fn hook_take_damage(
 
     let ret = run(this, 0, inflictor, attacker, damage, damagebits);
 
+    for callback in unsafe { &*hook }.callback_post.iter() {
+        callback(ithis, iinflictor, iattacker, damage, damagebits);
+    }
+
     return ret;
 }
 
@@ -133,7 +150,7 @@ pub fn move_address(pointer: *mut *mut c_void, offset: usize) -> *mut *mut c_voi
     (pointer.addr() + offset) as *mut *mut c_void
 }
 
-pub fn register_take_damage(ent_name: &str, callback: TakeDamageCallback) {
+pub fn register_take_damage(ent_name: &str, callback: HamCallback) {
     let Some(ent) = meta::create_entity() else {
         return;
     };
@@ -156,7 +173,9 @@ pub fn register_take_damage(ent_name: &str, callback: TakeDamageCallback) {
         return;
     }
 
-    specialbot::register_special_bot_take_damage(callback);
+    if ent_name.eq("player") {
+        specialbot::register_special_bot_take_damage(callback.clone());
+    }
 
     let vfunction = unsafe { *(move_address(vtable, DAMAGE_OFFSET)) };
 
@@ -167,15 +186,38 @@ pub fn register_take_damage(ent_name: &str, callback: TakeDamageCallback) {
     if let Some(tramp) = damage_trampoline.as_ref() {
         if tramp.tramp.as_ptr::<c_void>() == vfunction {
             log::info("powtórzona rejestracja");
+            match callback {
+                HamCallback::TakeDamage(callback) => {
+                    if let Some(hook) = TAKE_DAMAGE_HOOK.lock().unwrap().as_mut() {
+                        hook.callback_pre.push(callback);
+                    }
+                }
+                HamCallback::TakeDamagePost(callback) => {
+                    if let Some(hook) = TAKE_DAMAGE_HOOK.lock().unwrap().as_mut() {
+                        hook.callback_post.push(callback);
+                    }
+                }
+            };
             return;
         }
     }
 
-    let hook = Box::new(TakeDamageHook {
-        callback,
-        func: vfunction,
-        vtable,
-    });
+    log::info("normalna rejestracja");
+
+    let hook = match callback {
+        HamCallback::TakeDamage(callback) => Box::new(TakeDamageHook {
+            callback_pre: vec![callback],
+            callback_post: Vec::new(),
+            func: vfunction,
+            vtable,
+        }),
+        HamCallback::TakeDamagePost(callback) => Box::new(TakeDamageHook {
+            callback_pre: Vec::new(),
+            callback_post: vec![callback],
+            func: vfunction,
+            vtable,
+        }),
+    };
 
     let tramp = trampoline::create_generic_trampoline(
         true,
@@ -216,8 +258,6 @@ pub fn free_hooks() {
                 log::error(&format!("error while registering take damage: {:?}", err));
                 return;
             }
-        };
-        unsafe {
             *(move_address(vtable, DAMAGE_OFFSET)) = transmute(hook.func);
         }
     }

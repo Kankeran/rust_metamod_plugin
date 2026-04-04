@@ -2,13 +2,15 @@ use std::{
     alloc::{self, Layout},
     mem::transmute,
     os::raw::c_void,
-    ptr::{null, null_mut},
+    ptr::null_mut,
     sync::Mutex,
 };
 
+use region::Protection;
+
 use crate::{
     adapter::{
-        action_handler::{TakeDamageCallback, TakeDamageHook, TakeDamageTrampoline},
+        action_handler::{self, HamCallback, TakeDamageHook, TakeDamageTrampoline},
         metamod::{meta, meta_const},
         trampoline,
     },
@@ -16,7 +18,7 @@ use crate::{
 };
 
 struct SpecialBotHandler {
-    take_damage_register: Option<TakeDamageCallback>,
+    take_damage_register: Vec<HamCallback>,
     vtable: *mut *mut c_void,
 }
 
@@ -27,7 +29,7 @@ static SPECIAL_BOT_HANDLER: Mutex<Option<SpecialBotHandler>> = Mutex::new(None);
 
 static TAKE_DAMAGE_TRAMPOLINE: Mutex<Option<TakeDamageTrampoline>> = Mutex::new(None);
 
-static mut TAKE_DAMAGE_HOOK: *const TakeDamageHook = null();
+static TAKE_DAMAGE_HOOK: Mutex<Option<Box<TakeDamageHook>>> = Mutex::new(None);
 
 pub fn set_client_key_value(client_index: i32, _info_buffer: String, key: String, value: String) {
     let mut handler = SPECIAL_BOT_HANDLER.lock().unwrap();
@@ -58,26 +60,24 @@ pub fn set_client_key_value(client_index: i32, _info_buffer: String, key: String
 
     let vtable = super::action_handler::get_vtable(unsafe { &*ent }.pvPrivateData, 0x0); // 0x0 for now should be ok
 
-    if let Some(handler) = handler.as_mut() {
-        handler.vtable = vtable;
-        if let Some(cb) = handler.take_damage_register {
+    if let Some(handler) = handler.take() {
+        for cb in handler.take_damage_register.into_iter() {
             register_checked_take_damage(cb, vtable);
-            handler.take_damage_register = None;
         }
     }
 
     *handler = Some(SpecialBotHandler {
-        take_damage_register: None,
+        take_damage_register: Vec::new(),
         vtable,
     });
 }
 
-pub fn register_special_bot_take_damage(callback: TakeDamageCallback) {
+pub fn register_special_bot_take_damage(callback: HamCallback) {
     let mut handler = SPECIAL_BOT_HANDLER.lock().unwrap();
 
     if let Some(handler) = handler.as_mut() {
         if handler.vtable == null_mut() {
-            handler.take_damage_register = Some(callback);
+            handler.take_damage_register.push(callback);
             return;
         }
         register_checked_take_damage(callback, handler.vtable);
@@ -85,12 +85,12 @@ pub fn register_special_bot_take_damage(callback: TakeDamageCallback) {
     }
 
     *handler = Some(SpecialBotHandler {
-        take_damage_register: Some(callback),
+        take_damage_register: vec![callback],
         vtable: null_mut(),
     });
 }
 
-fn register_checked_take_damage(callback: TakeDamageCallback, vtable: *mut *mut c_void) {
+fn register_checked_take_damage(callback: HamCallback, vtable: *mut *mut c_void) {
     let damage_offset: usize = 12 * 4;
 
     let vfunction = unsafe { *((vtable.addr() + damage_offset) as *mut *mut c_void) }; // 12 - take damage offset, *4 - i32 size
@@ -102,6 +102,18 @@ fn register_checked_take_damage(callback: TakeDamageCallback, vtable: *mut *mut 
     if let Some(tramp) = damage_trampoline.as_ref() {
         if tramp.tramp.as_ptr::<c_void>() == vfunction {
             log::info("BOT powtórzona rejestracja");
+            match callback {
+                HamCallback::TakeDamage(callback) => {
+                    if let Some(hook) = TAKE_DAMAGE_HOOK.lock().unwrap().as_mut() {
+                        hook.callback_pre.push(callback);
+                    }
+                }
+                HamCallback::TakeDamagePost(callback) => {
+                    if let Some(hook) = TAKE_DAMAGE_HOOK.lock().unwrap().as_mut() {
+                        hook.callback_post.push(callback);
+                    }
+                }
+            };
             return;
         }
     }
@@ -112,28 +124,33 @@ fn register_checked_take_damage(callback: TakeDamageCallback, vtable: *mut *mut 
         log::error(&format!("cannot allocate memory"));
         return;
     }
-    unsafe {
-        *(ptr as *mut TakeDamageHook) = TakeDamageHook {
-            callback,
+    let hook = match callback {
+        HamCallback::TakeDamage(callback) => Box::new(TakeDamageHook {
+            callback_pre: vec![callback],
+            callback_post: Vec::new(),
             func: vfunction,
-            vtable
-        };
-    }
-    unsafe {
-        TAKE_DAMAGE_HOOK = ptr as *const TakeDamageHook;
-    }
+            vtable,
+        }),
+        HamCallback::TakeDamagePost(callback) => Box::new(TakeDamageHook {
+            callback_pre: Vec::new(),
+            callback_post: vec![callback],
+            func: vfunction,
+            vtable,
+        }),
+    };
 
     let tramp = trampoline::create_generic_trampoline(
         true,
         false,
         false,
         4,
-        unsafe { TAKE_DAMAGE_HOOK as *const c_void },
+        (&raw const (*hook)) as *const c_void,
         super::action_handler::hook_take_damage as *const c_void,
     );
+    let tramp_address = tramp.as_ptr::<c_void>();
+    *(TAKE_DAMAGE_HOOK.lock().unwrap()) = Some(hook);
 
     *damage_trampoline = Some(TakeDamageTrampoline { tramp: tramp });
-    use region::Protection;
     unsafe {
         if let Err(err) = region::protect(
             (vtable.addr() + damage_offset) as *mut *mut c_void,
@@ -145,7 +162,25 @@ fn register_checked_take_damage(callback: TakeDamageCallback, vtable: *mut *mut 
         }
     };
     unsafe {
-        *((vtable.addr() + damage_offset) as *mut *mut c_void) =
-            transmute(damage_trampoline.as_ref().unwrap().tramp.as_ptr::<c_void>());
+        *(action_handler::move_address(vtable, action_handler::DAMAGE_OFFSET)) = transmute(tramp_address);
     }
+}
+
+pub fn free_hooks() {
+    if let Some(hook) = TAKE_DAMAGE_HOOK.lock().unwrap().take() {
+        let vtable = hook.vtable;
+        unsafe {
+            if let Err(err) = region::protect(
+                action_handler::move_address(vtable, action_handler::DAMAGE_OFFSET),
+                4,
+                Protection::READ_WRITE,
+            ) {
+                log::error(&format!("error while registering take damage: {:?}", err));
+                return;
+            }
+            *(action_handler::move_address(vtable, action_handler::DAMAGE_OFFSET)) = transmute(hook.func);
+        }
+    }
+    *(TAKE_DAMAGE_TRAMPOLINE.lock().unwrap()) = None;
+    *(SPECIAL_BOT_HANDLER.lock().unwrap()) = None;
 }

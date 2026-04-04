@@ -21,6 +21,7 @@ pub use super::menu::Menu;
 pub use super::menu::NumKeys;
 pub use super::text_message_handler::register_text_message;
 pub use super::action_handler::register_take_damage;
+pub use super::action_handler::HamCallback;
 
 pub fn register_client_command(
     command: String,
