@@ -1,5 +1,5 @@
-use std::{ffi::CString, ptr};
 use super::{abi, entry, meta, msgs};
+use std::{ffi::CString, ptr};
 
 #[derive(Debug)]
 pub struct EdictPtr(*mut abi::edict_t);
@@ -187,6 +187,246 @@ pub fn get_say_text_id() -> Option<i32> {
 
 pub fn get_init_hud_id() -> Option<i32> {
     unsafe { msgs::INIT_HUD }
+}
+
+pub fn get_voice_mask_id() -> Option<i32> {
+    unsafe { msgs::VOICE_MASK }
+}
+
+pub fn get_req_state_id() -> Option<i32> {
+    unsafe { msgs::REQ_STATE }
+}
+
+pub fn get_geiger_id() -> Option<i32> {
+    unsafe { msgs::GEIGER }
+}
+
+pub fn get_flashlight_id() -> Option<i32> {
+    unsafe { msgs::FLASHLIGHT }
+}
+
+pub fn get_flash_bat_id() -> Option<i32> {
+    unsafe { msgs::FLASH_BAT }
+}
+
+pub fn get_train_id() -> Option<i32> {
+    unsafe { msgs::TRAIN }
+}
+
+pub fn get_hud_text_pro_id() -> Option<i32> {
+    unsafe { msgs::HUD_TEXT_PRO }
+}
+
+pub fn get_hud_text_id() -> Option<i32> {
+    unsafe { msgs::HUD_TEXT }
+}
+
+pub fn get_view_mode_id() -> Option<i32> {
+    unsafe { msgs::VIEW_MODE }
+}
+
+pub fn get_game_title_id() -> Option<i32> {
+    unsafe { msgs::GAME_TITLE }
+}
+
+pub fn get_score_attrib_id() -> Option<i32> {
+    unsafe { msgs::SCORE_ATTRIB }
+}
+
+pub fn get_team_score_id() -> Option<i32> {
+    unsafe { msgs::TEAM_SCORE }
+}
+
+pub fn get_game_mode_id() -> Option<i32> {
+    unsafe { msgs::GAME_MODE }
+}
+
+pub fn get_item_pickup_id() -> Option<i32> {
+    unsafe { msgs::ITEM_PICKUP }
+}
+
+pub fn get_hide_weapon_id() -> Option<i32> {
+    unsafe { msgs::HIDE_WEAPON }
+}
+
+pub fn get_set_fov_id() -> Option<i32> {
+    unsafe { msgs::SET_FOV }
+}
+
+pub fn get_screen_shake_id() -> Option<i32> {
+    unsafe { msgs::SCREEN_SHAKE }
+}
+
+pub fn get_screen_fade_id() -> Option<i32> {
+    unsafe { msgs::SCREEN_FADE }
+}
+
+pub fn get_money_id() -> Option<i32> {
+    unsafe { msgs::MONEY }
+}
+
+pub fn get_armor_type_id() -> Option<i32> {
+    unsafe { msgs::ARMOR_TYPE }
+}
+
+pub fn get_blink_acct_id() -> Option<i32> {
+    unsafe { msgs::BLINK_ACCT }
+}
+
+pub fn get_status_value_id() -> Option<i32> {
+    unsafe { msgs::STATUS_VALUE }
+}
+
+pub fn get_status_text_id() -> Option<i32> {
+    unsafe { msgs::STATUS_TEXT }
+}
+
+pub fn get_status_icon_id() -> Option<i32> {
+    unsafe { msgs::STATUS_ICON }
+}
+
+pub fn get_reload_sound_id() -> Option<i32> {
+    unsafe { msgs::RELOAD_SOUND }
+}
+
+pub fn get_crosshair_id() -> Option<i32> {
+    unsafe { msgs::CROSSHAIR }
+}
+
+pub fn get_nvg_toggle_id() -> Option<i32> {
+    unsafe { msgs::NVG_TOGGLE }
+}
+
+pub fn get_radar_id() -> Option<i32> {
+    unsafe { msgs::RADAR }
+}
+
+pub fn get_spectator_id() -> Option<i32> {
+    unsafe { msgs::SPECTATOR }
+}
+
+pub fn get_tutor_text_id() -> Option<i32> {
+    unsafe { msgs::TUTOR_TEXT }
+}
+
+pub fn get_tutor_line_id() -> Option<i32> {
+    unsafe { msgs::TUTOR_LINE }
+}
+
+pub fn get_tutor_state_id() -> Option<i32> {
+    unsafe { msgs::TUTOR_STATE }
+}
+
+pub fn get_tutor_close_id() -> Option<i32> {
+    unsafe { msgs::TUTOR_CLOSE }
+}
+
+pub fn get_allow_spec_id() -> Option<i32> {
+    unsafe { msgs::ALLOW_SPEC }
+}
+
+pub fn get_bomb_drop_id() -> Option<i32> {
+    unsafe { msgs::BOMB_DROP }
+}
+
+pub fn get_bomb_pickup_id() -> Option<i32> {
+    unsafe { msgs::BOMB_PICKUP }
+}
+
+pub fn get_cl_corpse_id() -> Option<i32> {
+    unsafe { msgs::CL_CORPSE }
+}
+
+pub fn get_hostage_pos_id() -> Option<i32> {
+    unsafe { msgs::HOSTAGE_POS }
+}
+
+pub fn get_hostage_k_id() -> Option<i32> {
+    unsafe { msgs::HOSTAGE_K }
+}
+
+pub fn get_hltv_id() -> Option<i32> {
+    unsafe { msgs::HLTV }
+}
+
+pub fn get_spec_health_id() -> Option<i32> {
+    unsafe { msgs::SPEC_HEALTH }
+}
+
+pub fn get_force_cam_id() -> Option<i32> {
+    unsafe { msgs::FORCE_CAM }
+}
+
+pub fn get_ad_stop_id() -> Option<i32> {
+    unsafe { msgs::AD_STOP }
+}
+
+pub fn get_receive_w_id() -> Option<i32> {
+    unsafe { msgs::RECEIVE_W }
+}
+
+pub fn get_cz_career_id() -> Option<i32> {
+    unsafe { msgs::CZ_CAREER }
+}
+
+pub fn get_cz_career_hud_id() -> Option<i32> {
+    unsafe { msgs::CZ_CAREER_HUD }
+}
+
+pub fn get_shadow_idx_id() -> Option<i32> {
+    unsafe { msgs::SHADOW_IDX }
+}
+
+pub fn get_task_time_id() -> Option<i32> {
+    unsafe { msgs::TASK_TIME }
+}
+
+pub fn get_scenario_id() -> Option<i32> {
+    unsafe { msgs::SCENARIO }
+}
+
+pub fn get_bot_voice_id() -> Option<i32> {
+    unsafe { msgs::BOT_VOICE }
+}
+
+pub fn get_buy_close_id() -> Option<i32> {
+    unsafe { msgs::BUY_CLOSE }
+}
+
+pub fn get_spec_health2_id() -> Option<i32> {
+    unsafe { msgs::SPEC_HEALTH2 }
+}
+
+pub fn get_bar_time2_id() -> Option<i32> {
+    unsafe { msgs::BAR_TIME2 }
+}
+
+pub fn get_item_status_id() -> Option<i32> {
+    unsafe { msgs::ITEM_STATUS }
+}
+
+pub fn get_location_id() -> Option<i32> {
+    unsafe { msgs::LOCATION }
+}
+
+pub fn get_bot_progress_id() -> Option<i32> {
+    unsafe { msgs::BOT_PROGRESS }
+}
+
+pub fn get_brass_id() -> Option<i32> {
+    unsafe { msgs::BRASS }
+}
+
+pub fn get_fog_id() -> Option<i32> {
+    unsafe { msgs::FOG }
+}
+
+pub fn get_show_timer_id() -> Option<i32> {
+    unsafe { msgs::SHOW_TIMER }
+}
+
+pub fn get_hud_text_args_id() -> Option<i32> {
+    unsafe { msgs::HUD_TEXT_ARGS }
 }
 
 pub fn message_begin(
