@@ -11,7 +11,7 @@ pub fn free_commands() {
     *(COMMANDS.lock().unwrap()) = Vec::new();
 }
 
-pub fn handle_client_command(id: i32, arguments: &Vec<String>) -> Return {
+pub fn handle_client_command(id: i32, arguments: &Vec<String>) -> Return<()> {
     let mut result = Return::Ignored;
     let command = &arguments[0];
     let argument = &arguments[1];
@@ -34,7 +34,7 @@ pub fn handle_client_command(id: i32, arguments: &Vec<String>) -> Return {
     result
 }
 
-type CommandCallback = Box<dyn Fn(i32, &Vec<String>) -> Return + Send + Sync + 'static>;
+pub type CommandCallback = Box<dyn Fn(i32, &Vec<String>) -> Return<()> + Send + Sync + 'static>;
 
 pub struct Command {
     command: String,

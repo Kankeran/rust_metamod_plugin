@@ -70,13 +70,18 @@ impl RawMessage {
         // parse to specific message and handle callbacks here :)
         if let Some(msg_type) = UserMsgs::try_from_i32(self.msg_type) {
             match msg_type {
-                UserMsgs::TextMsg => {text_message_handler::handle_text_message(self.to_text_message());}, // ignore return for now
-                _ => {}
+                UserMsgs::TextMsg => {
+                    let mut msg_instance = self.to_text_message();
+                    text_message_handler::handle_text_message(&mut msg_instance);
+                    msg_instance.send();
+                }, // ignore return for now
+                _ => {self.send();}
             }
+            return;
         }
 
         // log::debug(&format!("msg: {:?}", self));
-        self.send();
+        self.send(); // if unknown message type is used
     }
 
     fn send(&self) {

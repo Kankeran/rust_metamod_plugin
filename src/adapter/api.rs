@@ -22,11 +22,12 @@ pub use super::menu::NumKeys;
 pub use super::text_message_handler::register_text_message;
 pub use super::action_handler::register_take_damage;
 pub use super::action_handler::HamCallback;
+pub use super::action_handler::OverrideTakeDamage;
 
 pub fn register_client_command(
     command: String,
     argument: Option<String>,
-    callback: Box<dyn Fn(i32, &Vec<String>) -> Return + Send + Sync>,
+    callback: command::CommandCallback,
 ) {
     command::add_client_command(command::Command::new(command, argument, callback))
 }

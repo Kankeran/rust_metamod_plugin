@@ -26,10 +26,16 @@ pub static FIRST_EDICT: OnceLock<meta_api::EdictPtr> = OnceLock::new();
 // takedamage 12
 
 /// Box::new(|this: i32, inflictor: i32, attacker: i32, damage: f32, damagebits: i32| {/* your code */})
-pub type TakeDamageCallback = fn(i32, i32, i32, f32, i32) -> Return;
+pub type TakeDamageCallback = fn(i32, i32, i32, f32, i32) -> Return<Vec<OverrideTakeDamage>>;
 
 /// Box::new(|this: i32, inflictor: i32, attacker: i32, damage: f32, damagebits: i32| {/* your code */})
 pub type TakeDamageCallbackPost = fn(i32, i32, i32, f32, i32);
+
+pub enum OverrideTakeDamage {
+    Damage(f32),
+    Damagebits(i32),
+    Return(i32),
+}
 
 #[derive(Clone)]
 pub enum HamCallback {
@@ -115,9 +121,10 @@ pub extern "system" fn hook_take_damage(
     this: *mut c_void,
     inflictor: *mut super::metamod::abi::entvars_t,
     attacker: *mut super::metamod::abi::entvars_t,
-    damage: f32,
-    damagebits: i32,
+    mut damage: f32,
+    mut damagebits: i32,
 ) -> i32 {
+    let mut over_ret = None;
     let ithis = cbase_to_id(this);
     let iinflictor = entvars_to_id(inflictor);
     let iattacker = entvars_to_id(attacker);
@@ -125,7 +132,25 @@ pub extern "system" fn hook_take_damage(
 
     for callback in unsafe { &*hook }.callback_pre.iter() {
         // TODO: handling returns
-        callback(ithis, iinflictor, iattacker, damage, damagebits);
+        let res = callback(ithis, iinflictor, iattacker, damage, damagebits);
+        if let Return::Supercede = res {
+            return 0;
+        }
+        if let Return::Override(values) = res {
+            for value in values.into_iter() {
+                match value {
+                    OverrideTakeDamage::Damage(dmg) => {
+                        damage = dmg;
+                    }
+                    OverrideTakeDamage::Damagebits(bits) => {
+                        damagebits = bits;
+                    }
+                    OverrideTakeDamage::Return(ret) => {
+                        over_ret = Some(ret);
+                    }
+                }
+            }
+        }
     }
 
     let run: extern "fastcall" fn(
@@ -143,6 +168,9 @@ pub extern "system" fn hook_take_damage(
         callback(ithis, iinflictor, iattacker, damage, damagebits);
     }
 
+    if let Some(ret) = over_ret {
+        return ret;
+    }
     return ret;
 }
 

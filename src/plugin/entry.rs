@@ -45,7 +45,7 @@ pub fn plugin_init() {
 
 pub fn plugin_precache() {}
 
-fn on_classes_command(id: i32, _arguments: &Vec<String>) -> api::Return {
+fn on_classes_command(id: i32, _arguments: &Vec<String>) -> api::Return<()> {
     api::console_debug("jest client command 'classes'");
     api::client_print(
         Some(id),
@@ -71,20 +71,20 @@ fn on_classes_command(id: i32, _arguments: &Vec<String>) -> api::Return {
     api::Return::Ignored
 }
 
-fn on_class_command(_id: i32, _arguments: &Vec<String>) -> api::Return {
+fn on_class_command(_id: i32, _arguments: &Vec<String>) -> api::Return<()> {
     api::console_debug("jest client command 'class'");
     api::client_print(None, api::PrintMode::PrintChat, "ELO class".to_owned());
 
     api::Return::Ignored
 }
 
-fn on_rust_test(id: i32, _arguments: &Vec<String>) -> api::Return {
+fn on_rust_test(id: i32, _arguments: &Vec<String>) -> api::Return<()> {
     api::client_print(Some(id), api::PrintMode::PrintChat, "rust test".to_owned());
 
     api::Return::Ignored
 }
 
-fn on_menu(id: i32, _arguments: &Vec<String>) -> api::Return {
+fn on_menu(id: i32, _arguments: &Vec<String>) -> api::Return<()> {
     api::show_menu(
         id,
         Box::new(|_id: i32, menu: &mut api::Menu| {
@@ -111,7 +111,7 @@ fn on_menu(id: i32, _arguments: &Vec<String>) -> api::Return {
     api::Return::Ignored
 }
 
-fn on_menu2(id: i32, _arguments: &Vec<String>) -> api::Return {
+fn on_menu2(id: i32, _arguments: &Vec<String>) -> api::Return<()> {
     api::show_menu(
         id,
         Box::new(|_id: i32, menu: &mut api::Menu| {
@@ -132,7 +132,7 @@ fn on_menu2(id: i32, _arguments: &Vec<String>) -> api::Return {
     api::Return::Ignored
 }
 
-fn on_hud(id: i32, _arguments: &Vec<String>) -> api::Return {
+fn on_hud(id: i32, _arguments: &Vec<String>) -> api::Return<()> {
     let style = api::HudStyle {
         point: api::Point { x: 0.02, y: 0.23 },
         effect: 0,
@@ -158,7 +158,7 @@ fn on_hud(id: i32, _arguments: &Vec<String>) -> api::Return {
     api::Return::Ignored
 }
 
-fn on_dhud(id: i32, _arguments: &Vec<String>) -> api::Return {
+fn on_dhud(id: i32, _arguments: &Vec<String>) -> api::Return<()> {
     let style = api::HudStyle {
         point: api::Point { x: 0.2, y: 0.23 },
         effect: 0,
@@ -179,7 +179,7 @@ fn on_dhud(id: i32, _arguments: &Vec<String>) -> api::Return {
     api::Return::Ignored
 }
 
-fn take_damage(this: i32, _inflictor: i32, attacker: i32, damage: f32, _damagebits: i32) -> api::Return {
+fn take_damage(this: i32, _inflictor: i32, attacker: i32, damage: f32, _damagebits: i32) -> api::Return<Vec<api::OverrideTakeDamage>> {
     if this > 32 || attacker > 32 || this < 1 || attacker < 1 {
         return api::Return::Ignored;
     }
@@ -187,10 +187,10 @@ fn take_damage(this: i32, _inflictor: i32, attacker: i32, damage: f32, _damagebi
     api::client_print(Some(attacker), api::PrintMode::PrintChat, format!("zadales za {damage}"));
     api::client_print(Some(this), api::PrintMode::PrintChat, format!("oberwales za {damage}"));
 
-    api::Return::Ignored
+    api::Return::Override(vec![api::OverrideTakeDamage::Damage(11.0)])
 }
 
-fn take_damage2(this: i32, _inflictor: i32, attacker: i32, damage: f32, _damagebits: i32) -> api::Return {
+fn take_damage2(this: i32, _inflictor: i32, attacker: i32, damage: f32, _damagebits: i32) -> api::Return<Vec<api::OverrideTakeDamage>> {
     if this > 32 || attacker > 32 || this < 1 || attacker < 1 {
         return api::Return::Ignored;
     }

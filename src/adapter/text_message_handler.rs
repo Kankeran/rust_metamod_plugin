@@ -8,8 +8,14 @@ use super::messages_handler::RawMessage;
 use super::messages_handler::{self, MessageValue};
 use super::metamod::meta_api;
 
-type TextMessageCallback = Box<dyn Fn(&TextMessage) -> Return + Send + Sync + 'static>;
+type TextMessageCallback = Box<dyn Fn(&TextMessage) -> Return<Vec<OverrideTextMessage>> + Send + Sync + 'static>;
 static CALLBACKS: Mutex<Vec<TextMessageCallback>> = Mutex::new(Vec::new());
+
+pub enum OverrideTextMessage {
+    Id(Option<i32>),
+    Mode(PrintMode),
+    Msg(String),
+}
 
 impl RawMessage {
     pub fn to_text_message(&self) -> TextMessage {
@@ -31,16 +37,25 @@ pub fn register_text_message(callback: TextMessageCallback) {
     messages_handler::register_msg_handler(UserMsgs::TextMsg);
 }
 
-pub fn handle_text_message(msg: TextMessage) -> Return {
+pub fn handle_text_message(msg: &mut TextMessage) -> Return<()> {
     let mut result = Return::Ignored;
     if let Ok(callbacks) = CALLBACKS.lock() {
         for callback in callbacks.iter() {
-            let res = callback(&msg); // ignore override for now
+            let res = callback(&msg);
             if let Return::Supercede = res {
                 return Return::Supercede;
             }
             if result.lt(&res) {
-                result = res
+                result = res.into_empty()
+            }
+            if let Return::Override(values) = res {
+                for value in values.into_iter() {
+                    match value {
+                        OverrideTextMessage::Id(id) => {msg.id = id;}
+                        OverrideTextMessage::Mode(mode) => {msg.mode = mode;}
+                        OverrideTextMessage::Msg(message) => {msg.msg = message;}
+                    }
+                }
             }
         }
     }

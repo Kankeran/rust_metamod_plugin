@@ -1,24 +1,24 @@
 use crate::adapter::metamod::{meta_api, meta_const};
 
-pub enum Return {
+pub enum Return<T> {
     Ignored,
     Handled,
-    Override,
+    Override(T),
     Supercede,
     DeferSupercede,
 }
 
-impl Return {
-    pub fn lt(&self, ret: &Return) -> bool {
+impl<T> Return<T> {
+    pub fn lt<E>(&self, ret: &Return<E>) -> bool {
         match (self, ret) {
             (
                 Return::Ignored,
-                Return::Handled | Return::Override | Return::Supercede | Return::DeferSupercede,
+                Return::Handled | Return::Override(_) | Return::Supercede | Return::DeferSupercede,
             ) => true,
-            (Return::Handled, Return::Override | Return::Supercede | Return::DeferSupercede) => {
+            (Return::Handled, Return::Override(_) | Return::Supercede | Return::DeferSupercede) => {
                 true
             }
-            (Return::Override, Return::Supercede | Return::DeferSupercede) => true,
+            (Return::Override(_), Return::Supercede | Return::DeferSupercede) => true,
             (_, _) => false,
         }
     }
@@ -27,9 +27,19 @@ impl Return {
         match self {
             Return::Ignored => meta_const::RESULT_IGNORED,
             Return::Handled => meta_const::RESULT_HANDLED,
-            Return::Override => meta_const::RESULT_OVERRIDE,
+            Return::Override(_) => meta_const::RESULT_OVERRIDE,
             Return::Supercede => meta_const::RESULT_SUPERCEDE,
             Return::DeferSupercede => meta_const::RESULT_SUPERCEDE,
+        }
+    }
+    
+    pub fn into_empty(&self) -> Return<()> {
+        match self {
+            Return::Ignored => Return::Ignored,
+            Return::Handled => Return::Handled,
+            Return::Override(_) => Return::Override(()),
+            Return::Supercede => Return::Supercede,
+            Return::DeferSupercede => Return::DeferSupercede,
         }
     }
 }
