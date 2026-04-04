@@ -1,9 +1,8 @@
 use super::{
-    api,
     common_types::BlockMode,
     metamod::{meta_api, meta_const},
 };
-use crate::{adapter::{api::UserMsgs, text_message_handler}, util::log};
+use crate::adapter::{api::UserMsgs, text_message_handler};
 use std::sync::Mutex;
 
 static MSG: Mutex<Option<RawMessage>> = Mutex::new(None);
@@ -76,7 +75,7 @@ impl RawMessage {
             }
         }
 
-        log::debug(&format!("msg: {:?}", self));
+        // log::debug(&format!("msg: {:?}", self));
         self.send();
     }
 
@@ -106,19 +105,19 @@ pub fn message_begin(
     origin: Option<[f32; 3]>,
     ent: Option<meta_api::EdictPtr>,
 ) -> i32 {
-    let id = if let Some(id) = meta_api::get_ent_index(ent.as_ref()) {
-        id
-    } else {
-        0
-    };
-    api::console_debug(&format!(
-        "message_begin | msg_type {:?} ({}) | ent {:?}",
-        UserMsgs::try_from_i32(msg_type),
-        msg_type,
-        id
-    ));
+    // let id = if let Some(id) = meta_api::get_ent_index(ent.as_ref()) {
+    //     id
+    // } else {
+    //     0
+    // };
+    // api::console_debug(&format!(
+    //     "message_begin | msg_type {:?} ({}) | ent {:?}",
+    //     UserMsgs::try_from_i32(msg_type),
+    //     msg_type,
+    //     id
+    // ));
     if let BlockMode::BlockAll | BlockMode::BlockOne = unsafe { &MSG_BLOCKS[msg_type as usize] } {
-        api::console_debug("block message");
+        // api::console_debug("block message");
         unsafe {
             BLOCK_CURRENT = true;
             MSG_TYPE_CURRENT = msg_type;
@@ -126,7 +125,7 @@ pub fn message_begin(
 
         meta_const::RESULT_SUPERCEDE
     } else if unsafe { MSG_HOOKS[msg_type as usize] } {
-        api::console_debug("hook message");
+        // api::console_debug("hook message");
         unsafe {
             HOOK_CURRENT = true;
             MSG_TYPE_CURRENT = msg_type;

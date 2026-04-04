@@ -7,6 +7,10 @@ pub fn add_client_command(command: Command) {
     COMMANDS.lock().unwrap().push(command);
 }
 
+pub fn free_commands() {
+    *(COMMANDS.lock().unwrap()) = Vec::new();
+}
+
 pub fn handle_client_command(id: i32, arguments: &Vec<String>) -> Return {
     let mut result = Return::Ignored;
     let command = &arguments[0];

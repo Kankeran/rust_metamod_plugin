@@ -1,21 +1,13 @@
-use crate::adapter::specialbot;
+use crate::adapter::{action_handler, specialbot};
 
 use super::command;
-use std::sync::OnceLock;
-
-pub static INIT_FUNC: OnceLock<fn()> = OnceLock::new();
-pub static PRECACHE_FUNC: OnceLock<fn()> = OnceLock::new();
 
 pub fn adapter_setup() {
-    if let Some(precache) = PRECACHE_FUNC.get() {
-        precache()
-    }
+    crate::plugin::plugin_precache();
 }
 
 pub fn adapter_init() {
-    if let Some(init) = INIT_FUNC.get() {
-        init()
-    }
+    crate::plugin::plugin_init();
 }
 
 pub fn client_command(id: i32, args: Vec<String>) -> i32 {
@@ -24,4 +16,9 @@ pub fn client_command(id: i32, args: Vec<String>) -> i32 {
 
 pub fn set_client_key_value(client_index: i32, info_buffer: String, key: String, value: String) {
     specialbot::set_client_key_value(client_index, info_buffer, key, value);
+}
+
+pub fn free_data() {
+    action_handler::free_hooks();
+    command::free_commands();
 }

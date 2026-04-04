@@ -1,5 +1,4 @@
 use super::{entry, messages_handler, metamod::meta_api};
-use crate::plugin;
 
 pub fn load() {
     meta_api::setup_entry(
@@ -27,6 +26,4 @@ pub fn load() {
         messages_handler::write_entity_post,
         messages_handler::message_end_post,
     );
-
-    plugin::load();
 }

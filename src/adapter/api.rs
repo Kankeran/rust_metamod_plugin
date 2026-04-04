@@ -22,11 +22,6 @@ pub use super::menu::NumKeys;
 pub use super::text_message_handler::register_text_message;
 pub use super::action_handler::register_take_damage;
 
-pub fn setup_entry(init: fn(), precache: fn()) -> Result<(), fn()> {
-    entry::INIT_FUNC.set(init)?;
-    entry::PRECACHE_FUNC.set(precache)
-}
-
 pub fn register_client_command(
     command: String,
     argument: Option<String>,

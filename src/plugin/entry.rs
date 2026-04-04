@@ -1,7 +1,7 @@
-use crate::adapter::api::{self, NumKeys, console_log};
+use crate::{adapter::api::{self, NumKeys}, util::log};
 
 pub fn plugin_init() {
-    api::console_debug("jest init");
+    log::info("init wywołany");
     api::register_client_command(
         String::from("say"),
         Some(String::from("/classes")),
@@ -35,7 +35,7 @@ pub fn plugin_init() {
         Box::new(on_dhud),
     );
 
-    api::register_text_message(Box::new(|msg| {console_log(&format!("przechwycono msg {:?}", msg)); api::Return::Ignored}));
+    // api::register_text_message(Box::new(|msg| {console_log(&format!("przechwycono msg {:?}", msg)); api::Return::Ignored}));
 
     api::register_take_damage("player", take_damage);
 }
@@ -72,7 +72,7 @@ fn on_class_command(_id: i32, _arguments: &Vec<String>) -> api::Return {
     api::console_debug("jest client command 'class'");
     api::client_print(None, api::PrintMode::PrintChat, "ELO class".to_owned());
 
-    api::Return::Supercede
+    api::Return::Ignored
 }
 
 fn on_rust_test(id: i32, _arguments: &Vec<String>) -> api::Return {
@@ -88,7 +88,7 @@ fn on_menu(id: i32, _arguments: &Vec<String>) -> api::Return {
             menu.add_line("\\yawesome title", NumKeys::KeyNone); // title
             menu.add_line("", NumKeys::KeyNone); // blank
             menu.add_line("\\r1. \\welo", NumKeys::Key1); // item 1
-            menu.add_line("", NumKeys::KeyNone); // brank
+            menu.add_line("", NumKeys::KeyNone); // blank
             menu.add_line("\\d3. elo2", NumKeys::KeyNone); // disabled item 3
 
             menu.add_line("\\r4. \\yYO", NumKeys::Key4); // item 4

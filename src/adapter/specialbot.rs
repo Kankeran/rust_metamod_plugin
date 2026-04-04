@@ -101,7 +101,7 @@ fn register_checked_take_damage(callback: TakeDamageCallback, vtable: *mut *mut 
 
     if let Some(tramp) = damage_trampoline.as_ref() {
         if tramp.tramp.as_ptr::<c_void>() == vfunction {
-            log::info("powtórzona rejestracja");
+            log::info("BOT powtórzona rejestracja");
             return;
         }
     }
@@ -116,6 +116,7 @@ fn register_checked_take_damage(callback: TakeDamageCallback, vtable: *mut *mut 
         *(ptr as *mut TakeDamageHook) = TakeDamageHook {
             callback,
             func: vfunction,
+            vtable
         };
     }
     unsafe {

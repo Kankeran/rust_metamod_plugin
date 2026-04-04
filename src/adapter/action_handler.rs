@@ -1,17 +1,18 @@
 use std::{
-    alloc::{self, Layout},
     ffi::CString,
     mem::transmute,
     os::raw::c_void,
-    ptr::{null, null_mut},
+    ptr::null_mut,
     sync::{Mutex, OnceLock},
 };
 
-use region::Allocation;
+use region::{Allocation, Protection};
 
 use crate::{
     adapter::{
-        api::Return, metamod::{abi, meta, meta_api}, specialbot, trampoline
+        api::Return,
+        metamod::{abi, meta, meta_api},
+        specialbot, trampoline,
     },
     util::log,
 };
@@ -24,7 +25,7 @@ pub static FIRST_EDICT: OnceLock<meta_api::EdictPtr> = OnceLock::new();
 
 // takedamage 12
 
-/// Box::new(|id: i32, item: i32| {/* your code */})
+/// Box::new(|this: i32, inflictor: i32, attacker: i32, damage: f32, damagebits: i32| {/* your code */})
 pub type TakeDamageCallback = fn(i32, i32, i32, f32, i32) -> Return;
 
 pub struct TakeDamageTrampoline {
@@ -37,6 +38,7 @@ unsafe impl Send for TakeDamageTrampoline {}
 pub struct TakeDamageHook {
     pub callback: TakeDamageCallback,
     pub func: *mut c_void,
+    pub vtable: *mut *mut c_void,
 }
 
 unsafe impl Sync for TakeDamageHook {}
@@ -44,7 +46,9 @@ unsafe impl Send for TakeDamageHook {}
 
 static TAKE_DAMAGE_TRAMPOLINE: Mutex<Option<TakeDamageTrampoline>> = Mutex::new(None);
 
-static mut TAKE_DAMAGE_HOOK: *const TakeDamageHook = null();
+static TAKE_DAMAGE_HOOK: Mutex<Option<Box<TakeDamageHook>>> = Mutex::new(None);
+
+const DAMAGE_OFFSET: usize = 12 * 4;
 
 pub fn get_vtable(this: *mut c_void, size: usize) -> *mut *mut c_void {
     unsafe { *((this.addr() + size) as *mut *mut *mut c_void) }
@@ -64,8 +68,7 @@ fn edict_to_id(edict: *mut abi::edict_t) -> i32 {
     }
 
     if let Some(first) = FIRST_EDICT.get() {
-        log::info(&format!("edict {} | first edict {} | sizeof edict {}",edict.addr() as i32, first.as_ptr().addr() as i32, size_of::<abi::edict_t>() as i32));
-        return ((edict.addr() - first.as_ptr().addr())/size_of::<abi::edict_t>()) as i32;
+        return ((edict.addr() - first.as_ptr().addr()) / size_of::<abi::edict_t>()) as i32;
     }
 
     -1
@@ -108,7 +111,7 @@ pub extern "system" fn hook_take_damage(
     let ithis = cbase_to_id(this);
     let iinflictor = entvars_to_id(inflictor);
     let iattacker = entvars_to_id(attacker);
-    log::info(&format!("take damage wywolany2 {ithis} {iinflictor} {iattacker} {damage} {damagebits}"));
+    // log::info(&format!("take damage wywolany2 {ithis} {iinflictor} {iattacker} {damage} {damagebits}"));
 
     (unsafe { &*hook }.callback)(ithis, iinflictor, iattacker, damage, damagebits);
 
@@ -124,6 +127,10 @@ pub extern "system" fn hook_take_damage(
     let ret = run(this, 0, inflictor, attacker, damage, damagebits);
 
     return ret;
+}
+
+pub fn move_address(pointer: *mut *mut c_void, offset: usize) -> *mut *mut c_void {
+    (pointer.addr() + offset) as *mut *mut c_void
 }
 
 pub fn register_take_damage(ent_name: &str, callback: TakeDamageCallback) {
@@ -151,9 +158,7 @@ pub fn register_take_damage(ent_name: &str, callback: TakeDamageCallback) {
 
     specialbot::register_special_bot_take_damage(callback);
 
-    let damage_offset:usize = 12*4 ;
-
-    let vfunction = unsafe { *((vtable.addr() + damage_offset) as *mut *mut c_void) }; // 12 - take damage offset, *4 - i32 size
+    let vfunction = unsafe { *(move_address(vtable, DAMAGE_OFFSET)) };
 
     // check if is hooked
 
@@ -166,36 +171,27 @@ pub fn register_take_damage(ent_name: &str, callback: TakeDamageCallback) {
         }
     }
 
-    let layout = Layout::new::<TakeDamageHook>();
-    let ptr = unsafe { alloc::alloc(layout) };
-    if ptr.is_null() {
-        log::error(&format!("cannot allocate memory"));
-        return;
-    }
-    unsafe {
-        *(ptr as *mut TakeDamageHook) = TakeDamageHook {
-            callback,
-            func: vfunction,
-        };
-    }
-    unsafe {
-        TAKE_DAMAGE_HOOK = ptr as *const TakeDamageHook;
-    }
+    let hook = Box::new(TakeDamageHook {
+        callback,
+        func: vfunction,
+        vtable,
+    });
 
     let tramp = trampoline::create_generic_trampoline(
         true,
         false,
         false,
         4,
-        unsafe { TAKE_DAMAGE_HOOK as *const c_void },
+        (&raw const (*hook)) as *const c_void,
         hook_take_damage as *const c_void,
     );
+    let tramp_address = tramp.as_ptr::<c_void>();
+    *(TAKE_DAMAGE_HOOK.lock().unwrap()) = Some(hook);
 
     *damage_trampoline = Some(TakeDamageTrampoline { tramp: tramp });
-    use region::Protection;
     unsafe {
         if let Err(err) = region::protect(
-            (vtable.addr() + damage_offset) as *mut *mut c_void,
+            move_address(vtable, DAMAGE_OFFSET),
             4,
             Protection::READ_WRITE,
         ) {
@@ -204,7 +200,26 @@ pub fn register_take_damage(ent_name: &str, callback: TakeDamageCallback) {
         }
     };
     unsafe {
-        *((vtable.addr() + damage_offset) as *mut *mut c_void) =
-            transmute(damage_trampoline.as_ref().unwrap().tramp.as_ptr::<c_void>());
+        *(move_address(vtable, DAMAGE_OFFSET)) = transmute(tramp_address);
     }
+}
+
+pub fn free_hooks() {
+    if let Some(hook) = TAKE_DAMAGE_HOOK.lock().unwrap().take() {
+        let vtable = hook.vtable;
+        unsafe {
+            if let Err(err) = region::protect(
+                move_address(vtable, DAMAGE_OFFSET),
+                4,
+                Protection::READ_WRITE,
+            ) {
+                log::error(&format!("error while registering take damage: {:?}", err));
+                return;
+            }
+        };
+        unsafe {
+            *(move_address(vtable, DAMAGE_OFFSET)) = transmute(hook.func);
+        }
+    }
+    *(TAKE_DAMAGE_TRAMPOLINE.lock().unwrap()) = None;
 }

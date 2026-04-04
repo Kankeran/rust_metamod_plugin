@@ -94,5 +94,6 @@ pub extern "C" fn meta_detach(
     reason: abi::PL_UNLOAD_REASON,
 ) -> ::std::os::raw::c_int {
     log::debug("Meta_Detach");
+    crate::adapter::entry::free_data();
     1
 }
