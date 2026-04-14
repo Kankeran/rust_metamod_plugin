@@ -1,10 +1,7 @@
 //! [abi::META_FUNCTIONS::pfnGetEntityAPI2] and [abi::META_FUNCTIONS::pfnGetEntityAPI2_Post] implementations
 
 use super::{abi, adapter, entry, meta, meta_const, msgs};
-use crate::{
-    adapter::{action_handler, metamod::meta_api::EdictPtr},
-    util::log,
-};
+use crate::util::log;
 use cstr::cstr;
 use std::{cmp::max, ptr::null_mut, sync::LazyLock};
 
@@ -44,7 +41,6 @@ extern "C" fn spawn(_entity: *mut abi::edict_t) -> i32 {
         meta::set_result(meta_const::RESULT_IGNORED);
         return 0;
     }
-    log::info("spawn");
     entry::meta_setup();
     crate::adapter::setup_first_edict();
 
@@ -299,7 +295,6 @@ extern "C" fn server_activate_post(
     _entity_count: ::std::os::raw::c_int,
     _client_max: ::std::os::raw::c_int,
 ) {
-    let _ = action_handler::FIRST_EDICT.set(EdictPtr::new(meta::get_ent_by_index(0).unwrap()));
     entry::meta_init();
 }
 

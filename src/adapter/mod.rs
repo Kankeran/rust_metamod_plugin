@@ -1,4 +1,3 @@
-mod action_handler;
 #[allow(unused_imports)]
 pub mod api;
 mod bootstrap;
@@ -11,7 +10,6 @@ mod messages;
 mod messages_handler;
 mod metamod;
 mod player;
-mod specialbot;
 mod text_message_handler;
 mod trampoline;
 

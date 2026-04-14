@@ -3,7 +3,7 @@ use std::rc::Rc;
 use crate::{
     adapter::{
         self,
-        api::{self, HamCallback, NumKeys},
+        api::{self, NumKeys},
     },
     util::log,
 };

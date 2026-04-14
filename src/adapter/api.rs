@@ -1,6 +1,6 @@
 use std::ffi::CString;
 
-use super::metamod::{meta};
+use super::metamod::meta;
 use super::{
     command, entry,
     messages::{DHudMessage, HudMessage, TextMessage},
@@ -12,17 +12,14 @@ pub use super::messages::HudStyle;
 pub use super::messages::Point;
 pub use super::messages_handler::block_msg;
 // pub use meta_api::EdictPtr;
-pub use super::common_types::Return;
 pub use super::common_types::BlockMode;
 pub use super::common_types::PrintMode;
+pub use super::common_types::Return;
 pub use super::common_types::UserMsgs;
-pub use super::menu::show_menu;
 pub use super::menu::Menu;
 pub use super::menu::NumKeys;
+pub use super::menu::show_menu;
 pub use super::text_message_handler::register_text_message;
-pub use super::action_handler::register_take_damage;
-pub use super::action_handler::HamCallback;
-pub use super::action_handler::OverrideTakeDamage;
 
 pub fn register_client_command(
     command: String,
