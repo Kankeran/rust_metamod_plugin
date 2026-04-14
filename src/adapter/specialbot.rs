@@ -91,16 +91,14 @@ pub fn register_special_bot_take_damage(callback: HamCallback) {
 }
 
 fn register_checked_take_damage(callback: HamCallback, vtable: *mut *mut c_void) {
-    let damage_offset: usize = 12 * 4;
-
-    let vfunction = unsafe { *((vtable.addr() + damage_offset) as *mut *mut c_void) }; // 12 - take damage offset, *4 - i32 size
+    let vfunction = unsafe { *(vtable.add(action_handler::DAMAGE_OFFSET)) };
 
     // check if is hooked
 
     let mut damage_trampoline = TAKE_DAMAGE_TRAMPOLINE.lock().unwrap();
 
     if let Some(tramp) = damage_trampoline.as_ref() {
-        if tramp.tramp.as_ptr::<c_void>() == vfunction {
+        if tramp.0.as_ptr::<c_void>() == vfunction {
             log::info("BOT powtórzona rejestracja");
             match callback {
                 HamCallback::TakeDamage(callback) => {
@@ -150,37 +148,22 @@ fn register_checked_take_damage(callback: HamCallback, vtable: *mut *mut c_void)
     let tramp_address = tramp.as_ptr::<c_void>();
     *(TAKE_DAMAGE_HOOK.lock().unwrap()) = Some(hook);
 
-    *damage_trampoline = Some(TakeDamageTrampoline { tramp: tramp });
+    *damage_trampoline = Some(TakeDamageTrampoline(tramp));
     unsafe {
         if let Err(err) = region::protect(
-            (vtable.addr() + damage_offset) as *mut *mut c_void,
+            vtable.add(action_handler::DAMAGE_OFFSET),
             4,
             Protection::READ_WRITE,
         ) {
             log::error(&format!("error while registering take damage: {:?}", err));
             return;
         }
-    };
-    unsafe {
-        *(action_handler::move_address(vtable, action_handler::DAMAGE_OFFSET)) = transmute(tramp_address);
+        *vtable.add(action_handler::DAMAGE_OFFSET) = transmute(tramp_address);
     }
 }
 
 pub fn free_hooks() {
-    if let Some(hook) = TAKE_DAMAGE_HOOK.lock().unwrap().take() {
-        let vtable = hook.vtable;
-        unsafe {
-            if let Err(err) = region::protect(
-                action_handler::move_address(vtable, action_handler::DAMAGE_OFFSET),
-                4,
-                Protection::READ_WRITE,
-            ) {
-                log::error(&format!("error while registering take damage: {:?}", err));
-                return;
-            }
-            *(action_handler::move_address(vtable, action_handler::DAMAGE_OFFSET)) = transmute(hook.func);
-        }
-    }
+    *(TAKE_DAMAGE_HOOK.lock().unwrap()) = None;
     *(TAKE_DAMAGE_TRAMPOLINE.lock().unwrap()) = None;
     *(SPECIAL_BOT_HANDLER.lock().unwrap()) = None;
 }

@@ -1,4 +1,12 @@
-use crate::{adapter::api::{self, HamCallback, NumKeys}, util::log};
+use std::rc::Rc;
+
+use crate::{
+    adapter::{
+        self,
+        api::{self, HamCallback, NumKeys},
+    },
+    util::log,
+};
 
 pub fn plugin_init() {
     log::info("init wywołany");
@@ -35,12 +43,14 @@ pub fn plugin_init() {
         Box::new(on_dhud),
     );
 
-    // api::register_text_message(Box::new(|msg| {console_log(&format!("przechwycono msg {:?}", msg)); api::Return::Ignored}));
-
-    api::register_take_damage("player", HamCallback::TakeDamagePost(take_damage_post));
-    api::register_take_damage("player", HamCallback::TakeDamage(take_damage));
-    api::register_take_damage("player", HamCallback::TakeDamagePost(take_damage_post2));
-    api::register_take_damage("player", HamCallback::TakeDamage(take_damage2));
+    adapter::register_ham(
+        "player",
+        adapter::HamCallback::TakeDamagePost(Rc::new(take_damage_post)),
+    );
+    adapter::register_ham(
+        "player",
+        adapter::HamCallback::TakeDamage(Rc::new(take_damage)),
+    );
 }
 
 pub fn plugin_precache() {}
@@ -115,7 +125,10 @@ fn on_menu2(id: i32, _arguments: &Vec<String>) -> api::Return<()> {
     api::show_menu(
         id,
         Box::new(|_id: i32, menu: &mut api::Menu| {
-            menu.add_line("\\ysuper ciekawe menu\nbez jakichkolwiek opcji\nto menu niesie tylko informacje", NumKeys::KeyNone);
+            menu.add_line(
+                "\\ysuper ciekawe menu\nbez jakichkolwiek opcji\nto menu niesie tylko informacje",
+                NumKeys::KeyNone,
+            );
             menu.add_line("cokolwiek klikniesz", NumKeys::KeyNone);
             menu.add_line("to menu zniknie", NumKeys::KeyNone);
             menu.add_keys(&[NumKeys::KeyAll]);
@@ -179,26 +192,33 @@ fn on_dhud(id: i32, _arguments: &Vec<String>) -> api::Return<()> {
     api::Return::Ignored
 }
 
-fn take_damage(this: i32, _inflictor: i32, attacker: i32, damage: f32, _damagebits: i32) -> api::Return<Vec<api::OverrideTakeDamage>> {
+fn take_damage(
+    this: i32,
+    _inflictor: i32,
+    attacker: i32,
+    damage: f32,
+    damagebits: i32,
+) -> api::Return<Vec<adapter::OverrideTakeDamage>> {
     if this > 32 || attacker > 32 || this < 1 || attacker < 1 {
         return api::Return::Ignored;
     }
 
-    api::client_print(Some(attacker), api::PrintMode::PrintChat, format!("zadales za {damage}"));
-    api::client_print(Some(this), api::PrintMode::PrintChat, format!("oberwales za {damage}"));
+    api::client_print(
+        Some(attacker),
+        api::PrintMode::PrintChat,
+        format!("zadales za {damage}"),
+    );
+    api::client_print(
+        Some(this),
+        api::PrintMode::PrintChat,
+        format!("oberwales za {damage}"),
+    );
 
-    api::Return::Override(vec![api::OverrideTakeDamage::Damage(11.0)])
-}
-
-fn take_damage2(this: i32, _inflictor: i32, attacker: i32, damage: f32, _damagebits: i32) -> api::Return<Vec<api::OverrideTakeDamage>> {
-    if this > 32 || attacker > 32 || this < 1 || attacker < 1 {
-        return api::Return::Ignored;
+    if damagebits & 1 << 1 > 0 {
+        api::Return::Override(vec![adapter::OverrideTakeDamage::Damage(11.0)])
+    } else {
+        api::Return::Ignored
     }
-
-    api::client_print(Some(attacker), api::PrintMode::PrintChat, format!("2 zadales za {damage}"));
-    api::client_print(Some(this), api::PrintMode::PrintChat, format!("2 oberwales za {damage}"));
-
-    api::Return::Ignored
 }
 
 fn take_damage_post(this: i32, _inflictor: i32, attacker: i32, damage: f32, _damagebits: i32) {
@@ -206,15 +226,14 @@ fn take_damage_post(this: i32, _inflictor: i32, attacker: i32, damage: f32, _dam
         return;
     }
 
-    api::client_print(Some(attacker), api::PrintMode::PrintChat, format!("POST zadales za {damage}"));
-    api::client_print(Some(this), api::PrintMode::PrintChat, format!("POST oberwales za {damage}"));
-}
-
-fn take_damage_post2(this: i32, _inflictor: i32, attacker: i32, damage: f32, _damagebits: i32) {
-    if this > 32 || attacker > 32 || this < 1 || attacker < 1 {
-        return;
-    }
-
-    api::client_print(Some(attacker), api::PrintMode::PrintChat, format!("POST2 zadales za {damage}"));
-    api::client_print(Some(this), api::PrintMode::PrintChat, format!("POST2 oberwales za {damage}"));
+    api::client_print(
+        Some(attacker),
+        api::PrintMode::PrintChat,
+        format!("POST zadales za {damage}"),
+    );
+    api::client_print(
+        Some(this),
+        api::PrintMode::PrintChat,
+        format!("POST oberwales za {damage}"),
+    );
 }

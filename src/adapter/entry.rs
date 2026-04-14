@@ -1,4 +1,4 @@
-use crate::adapter::{action_handler, specialbot};
+use crate::adapter::{action_handler, ham, specialbot};
 
 use super::command;
 
@@ -15,10 +15,17 @@ pub fn client_command(id: i32, args: Vec<String>) -> i32 {
 }
 
 pub fn set_client_key_value(client_index: i32, info_buffer: String, key: String, value: String) {
-    specialbot::set_client_key_value(client_index, info_buffer, key, value);
+    specialbot::set_client_key_value(
+        client_index,
+        info_buffer.clone(),
+        key.clone(),
+        value.clone(),
+    );
+    ham::set_client_key_value(client_index, info_buffer, key, value);
 }
 
 pub fn free_data() {
+    ham::free_hooks();
     action_handler::free_hooks();
     specialbot::free_hooks();
     command::free_commands();

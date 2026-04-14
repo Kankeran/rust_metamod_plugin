@@ -1,5 +1,10 @@
+use crate::adapter::metamod::abi::{edict_t, entvars_t};
+
 use super::{abi, entry, meta, msgs};
-use std::{ffi::CString, ptr};
+use std::{
+    ffi::CString,
+    ptr::{self, null},
+};
 
 #[derive(Debug)]
 pub struct EdictPtr(*mut abi::edict_t);
@@ -15,6 +20,14 @@ impl EdictPtr {
     pub fn as_ptr(&self) -> *mut abi::edict_t {
         self.0
     }
+}
+
+pub fn vars(pent: *mut edict_t) -> *const entvars_t {
+    if pent.is_null() {
+        return null();
+    }
+
+    return unsafe { ptr::addr_of!((*pent).v) };
 }
 
 pub fn setup_entry(

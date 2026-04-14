@@ -12,12 +12,12 @@ sudo apt install gcc-multilib g++-multilib
 
 ### Linux
 ```bash
-bindgen metamod.h --with-derive-default -o src/metamod/adapter/abi/linux.rs -- -x c++ -target i686-unknown-linux-gnu
+bindgen metamod.h --with-derive-default -o src/adapter/metamod/abi/linux.rs -- -x c++ -target i686-unknown-linux-gnu
 ```
 
 ### Windows
 ```bash
-bindgen metamod.h --with-derive-default -o src/metamod/adapter/abi/windows.rs -- -x c++ -target i686-pc-windows-msvc
+bindgen metamod.h --with-derive-default -o src/adapter/metamod/abi/windows.rs -- -x c++ -target i686-pc-windows-msvc
 ```
 
 

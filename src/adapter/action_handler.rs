@@ -3,6 +3,7 @@ use std::{
     mem::transmute,
     os::raw::c_void,
     ptr::null_mut,
+    rc::Rc,
     sync::{Mutex, OnceLock},
 };
 
@@ -25,11 +26,12 @@ pub static FIRST_EDICT: OnceLock<meta_api::EdictPtr> = OnceLock::new();
 
 // takedamage 12
 
-/// Box::new(|this: i32, inflictor: i32, attacker: i32, damage: f32, damagebits: i32| {/* your code */})
-pub type TakeDamageCallback = fn(i32, i32, i32, f32, i32) -> Return<Vec<OverrideTakeDamage>>;
+/// Rc::new(|this: i32, inflictor: i32, attacker: i32, damage: f32, damagebits: i32| -> api::Return<Vec<OverrideTakeDamage>> {/* your code */})
+pub type TakeDamageCallback =
+    Rc<dyn Fn(i32, i32, i32, f32, i32) -> Return<Vec<OverrideTakeDamage>>>;
 
-/// Box::new(|this: i32, inflictor: i32, attacker: i32, damage: f32, damagebits: i32| {/* your code */})
-pub type TakeDamageCallbackPost = fn(i32, i32, i32, f32, i32);
+/// Rc::new(|this: i32, inflictor: i32, attacker: i32, damage: f32, damagebits: i32| {/* your code */})
+pub type TakeDamageCallbackPost = Rc<dyn Fn(i32, i32, i32, f32, i32)>;
 
 pub enum OverrideTakeDamage {
     Damage(f32),
@@ -43,9 +45,7 @@ pub enum HamCallback {
     TakeDamagePost(TakeDamageCallbackPost),
 }
 
-pub struct TakeDamageTrampoline {
-    pub tramp: Allocation,
-}
+pub struct TakeDamageTrampoline(pub Allocation);
 
 unsafe impl Sync for TakeDamageTrampoline {}
 unsafe impl Send for TakeDamageTrampoline {}
@@ -60,14 +60,27 @@ pub struct TakeDamageHook {
 unsafe impl Sync for TakeDamageHook {}
 unsafe impl Send for TakeDamageHook {}
 
+impl Drop for TakeDamageHook {
+    fn drop(&mut self) {
+        let vtable_with_offset = unsafe { self.vtable.add(DAMAGE_OFFSET) };
+        unsafe {
+            if let Err(err) = region::protect(vtable_with_offset, 4, Protection::READ_WRITE) {
+                log::error(&format!("error while registering take damage: {:?}", err));
+                return;
+            }
+            *vtable_with_offset = transmute(self.func);
+        }
+    }
+}
+
 static TAKE_DAMAGE_TRAMPOLINE: Mutex<Option<TakeDamageTrampoline>> = Mutex::new(None);
 
 static TAKE_DAMAGE_HOOK: Mutex<Option<Box<TakeDamageHook>>> = Mutex::new(None);
 
-pub const DAMAGE_OFFSET: usize = 12 * 4;
+pub const DAMAGE_OFFSET: usize = 12;
 
 pub fn get_vtable(this: *mut c_void, size: usize) -> *mut *mut c_void {
-    unsafe { *((this.addr() + size) as *mut *mut *mut c_void) }
+    unsafe { *((this.add(size)) as *mut *mut *mut c_void) }
 }
 
 fn entvar_to_edict(pev: *mut super::metamod::abi::entvars_t) -> *mut super::metamod::abi::edict_t {
@@ -174,10 +187,6 @@ pub extern "system" fn hook_take_damage(
     return ret;
 }
 
-pub fn move_address(pointer: *mut *mut c_void, offset: usize) -> *mut *mut c_void {
-    (pointer.addr() + offset) as *mut *mut c_void
-}
-
 pub fn register_take_damage(ent_name: &str, callback: HamCallback) {
     let Some(ent) = meta::create_entity() else {
         return;
@@ -205,14 +214,14 @@ pub fn register_take_damage(ent_name: &str, callback: HamCallback) {
         specialbot::register_special_bot_take_damage(callback.clone());
     }
 
-    let vfunction = unsafe { *(move_address(vtable, DAMAGE_OFFSET)) };
+    let vfunction = unsafe { *vtable.add(DAMAGE_OFFSET) };
 
     // check if is hooked
 
     let mut damage_trampoline = TAKE_DAMAGE_TRAMPOLINE.lock().unwrap();
 
     if let Some(tramp) = damage_trampoline.as_ref() {
-        if tramp.tramp.as_ptr::<c_void>() == vfunction {
+        if tramp.0.as_ptr::<c_void>() == vfunction {
             log::info("powtórzona rejestracja");
             match callback {
                 HamCallback::TakeDamage(callback) => {
@@ -258,36 +267,17 @@ pub fn register_take_damage(ent_name: &str, callback: HamCallback) {
     let tramp_address = tramp.as_ptr::<c_void>();
     *(TAKE_DAMAGE_HOOK.lock().unwrap()) = Some(hook);
 
-    *damage_trampoline = Some(TakeDamageTrampoline { tramp: tramp });
+    *damage_trampoline = Some(TakeDamageTrampoline(tramp));
     unsafe {
-        if let Err(err) = region::protect(
-            move_address(vtable, DAMAGE_OFFSET),
-            4,
-            Protection::READ_WRITE,
-        ) {
+        if let Err(err) = region::protect(vtable.add(DAMAGE_OFFSET), 4, Protection::READ_WRITE) {
             log::error(&format!("error while registering take damage: {:?}", err));
             return;
         }
-    };
-    unsafe {
-        *(move_address(vtable, DAMAGE_OFFSET)) = transmute(tramp_address);
+        *vtable.add(DAMAGE_OFFSET) = transmute(tramp_address);
     }
 }
 
 pub fn free_hooks() {
-    if let Some(hook) = TAKE_DAMAGE_HOOK.lock().unwrap().take() {
-        let vtable = hook.vtable;
-        unsafe {
-            if let Err(err) = region::protect(
-                move_address(vtable, DAMAGE_OFFSET),
-                4,
-                Protection::READ_WRITE,
-            ) {
-                log::error(&format!("error while registering take damage: {:?}", err));
-                return;
-            }
-            *(move_address(vtable, DAMAGE_OFFSET)) = transmute(hook.func);
-        }
-    }
+    *(TAKE_DAMAGE_HOOK.lock().unwrap()) = None;
     *(TAKE_DAMAGE_TRAMPOLINE.lock().unwrap()) = None;
 }

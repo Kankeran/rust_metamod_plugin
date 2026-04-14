@@ -1,15 +1,22 @@
+mod action_handler;
 #[allow(unused_imports)]
 pub mod api;
 mod bootstrap;
 mod command;
 mod common_types;
 mod entry;
+mod ham;
 mod menu;
 mod messages;
 mod messages_handler;
 mod metamod;
 mod player;
+mod specialbot;
 mod text_message_handler;
 mod trampoline;
-mod action_handler;
-mod specialbot;
+
+pub use ham::HamCallback;
+pub use ham::OverrideTakeDamage;
+
+pub use ham::register_ham;
+use ham::setup_first_edict;

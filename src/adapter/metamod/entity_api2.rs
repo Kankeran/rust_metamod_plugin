@@ -8,6 +8,8 @@ use crate::{
 use cstr::cstr;
 use std::{cmp::max, ptr::null_mut, sync::LazyLock};
 
+static mut INITIALIZED: bool = false;
+
 static FUNCTION_TABLE: LazyLock<abi::DLL_FUNCTIONS> = LazyLock::new(|| abi::DLL_FUNCTIONS {
     pfnSpawn: Some(spawn),
     pfnClientConnect: Some(client_connect),
@@ -38,8 +40,17 @@ pub extern "C" fn get_api(
 }
 
 extern "C" fn spawn(_entity: *mut abi::edict_t) -> i32 {
+    if unsafe { INITIALIZED } {
+        meta::set_result(meta_const::RESULT_IGNORED);
+        return 0;
+    }
+    log::info("spawn");
     entry::meta_setup();
+    crate::adapter::setup_first_edict();
 
+    unsafe {
+        INITIALIZED = true;
+    }
     meta::set_result(meta_const::RESULT_IGNORED);
     0
 }
